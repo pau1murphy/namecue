@@ -713,11 +713,16 @@ function deleteCategory(idx){
 }
 
 // AUTH STATE
+// Always hide splash after 3 seconds max
+setTimeout(()=>{
+  const splash=document.getElementById('splash-screen');
+  if(splash){splash.classList.add('hide');setTimeout(()=>splash.style.display='none',300);}
+}, 3000);
+
 sb.auth.onAuthStateChange(async(event,session)=>{
-  setTimeout(()=>{
-    const splash=document.getElementById('splash-screen');
-    if(splash){splash.classList.add('hide');setTimeout(()=>splash.style.display='none',300);}
-  }, 800);
+  // Hide splash as soon as auth state is known
+  const splash=document.getElementById('splash-screen');
+  if(splash){splash.classList.add('hide');setTimeout(()=>splash.style.display='none',300);}
   if(session?.user){
     currentUser=session.user;
     document.getElementById('auth-screen').style.display='none';
