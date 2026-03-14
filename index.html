@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Namecue</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Lora:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F5F5F7;--white:#FFFFFF;--ink:#1D1D1F;--ink2:#6E6E73;--ink3:#AEAEB2;
+  --blue:#0071E3;--blue-light:#EBF3FC;--blue-mid:rgba(0,113,227,0.12);--blue-border:rgba(0,113,227,0.2);
+  --green:#34C759;--green-light:rgba(52,199,89,0.1);
+  --orange:#FF9500;--orange-light:rgba(255,149,0,0.1);
+  --red:#FF3B30;--red-light:rgba(255,59,48,0.1);
+  --border:rgba(0,0,0,0.06);--border-strong:rgba(0,0,0,0.1);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow:0 4px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);
+  --radius:18px;--radius-sm:12px;--radius-xs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+header{background:rgba(245,245,247,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.logo{font-family:'Lora',serif;font-size:24px;font-weight:600;letter-spacing:-0.3px;display:flex;align-items:center;gap:0}
+.logo-plain{color:var(--ink)}
+.logo-accent{color:var(--blue);font-style:italic;font-weight:500}
+.btn-icon{width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,0.05);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:16px}
+.btn-icon:hover{background:rgba(0,0,0,0.08)}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 60px)}
+sidebar{background:var(--bg);border-right:1px solid var(--border);padding:20px 12px;overflow-y:auto;display:block;position:sticky;top:60px;height:calc(100vh - 60px)}
+.sidebar-label{font-size:11px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink3);padding:4px 12px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;color:var(--ink2);font-size:14px;transition:all 0.1s;margin-bottom:2px}
+.nav-item:hover{background:rgba(0,0,0,0.04);color:var(--ink)}
+.nav-item.active{background:var(--white);color:var(--blue);font-weight:500;box-shadow:var(--shadow-sm)}
+.nav-icon{font-size:15px;width:20px;text-align:center}
+.nav-count{margin-left:auto;font-size:12px;font-weight:500;color:var(--ink3)}
+.nav-item.active .nav-count{color:var(--blue)}
+.sidebar-sep{height:1px;background:var(--border);margin:12px 8px}
+.place-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-xs);cursor:pointer;color:var(--ink2);font-size:13px;transition:all 0.1s;margin-bottom:1px}
+.place-item:hover{background:rgba(0,0,0,0.04);color:var(--ink)}
+.place-item.active{background:var(--blue-light);color:var(--blue);font-weight:500}
+.place-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;opacity:0.4}
+.place-item.active .place-dot{opacity:1}
+main{padding:32px 36px;max-width:980px}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px}
+.page-title{font-family:'Lora',serif;font-size:28px;font-weight:600;letter-spacing:-0.3px;line-height:1.1}
+.page-subtitle{font-size:13px;color:var(--ink3);margin-top:5px}
+.btn-primary{background:var(--blue);color:#fff;border:none;padding:10px 20px;border-radius:100px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.15s;white-space:nowrap;flex-shrink:0}
+.btn-primary:hover{background:#0077ED;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,113,227,0.3)}
+.btn-primary:active{transform:scale(0.97)}
+.search-wrap{position:relative;margin-bottom:20px}
+.search-wrap input{width:100%;padding:11px 16px 11px 42px;background:var(--white);border:1px solid var(--border);border-radius:100px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;box-shadow:var(--shadow-sm);transition:all 0.15s}
+.search-wrap input:focus{border-color:var(--blue-border);box-shadow:0 0 0 3px var(--blue-mid)}
+.search-wrap input::placeholder{color:var(--ink3)}
+.search-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:15px;pointer-events:none}
+.people-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.person-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:20px;cursor:pointer;transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);position:relative;box-shadow:var(--shadow-sm);animation:fadeUp 0.3s ease both}
+.person-card:hover{transform:translateY(-3px) scale(1.01);box-shadow:var(--shadow)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.notify-badge{position:absolute;top:16px;right:16px;font-size:13px;opacity:0.65}
+.card-top{display:flex;align-items:flex-start;gap:13px;margin-bottom:13px}
+.avatar{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;flex-shrink:0;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:14px}
+.av-blue{background:linear-gradient(145deg,#34AADC,#0071E3)}
+.av-purple{background:linear-gradient(145deg,#AF52DE,#5856D6)}
+.av-pink{background:linear-gradient(145deg,#FF6B81,#FF2D55)}
+.av-green{background:linear-gradient(145deg,#4CD964,#34C759)}
+.av-orange{background:linear-gradient(145deg,#FFCC00,#FF9500)}
+.card-info{flex:1;min-width:0;padding-right:20px}
+.card-name{font-family:'Lora',serif;font-size:15px;font-weight:600;color:var(--ink);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.1px}
+.card-context{font-size:12px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-location{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--blue);margin-bottom:10px;font-weight:500}
+.card-hook{font-size:13px;color:var(--ink2);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:8px 10px;background:var(--bg);border-radius:var(--radius-xs);font-style:italic}
+.card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.tag{font-size:11px;font-weight:500;padding:3px 9px;border-radius:100px;background:var(--bg);color:var(--ink3)}
+.tag.like{background:var(--green-light);color:var(--green)}
+.tag.dislike{background:var(--red-light);color:var(--red)}
+.tag.bday{background:var(--orange-light);color:var(--orange)}
+.card-footer{padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-date{font-size:11px;color:var(--ink3)}
+.card-notify-label{font-size:11px;color:var(--blue);font-weight:500}
+.empty-state{text-align:center;padding:80px 40px}
+.empty-icon{font-size:52px;margin-bottom:16px;opacity:0.2}
+.empty-title{font-size:22px;font-weight:600;color:var(--ink2);margin-bottom:10px;letter-spacing:-0.3px}
+.empty-text{font-size:14px;color:var(--ink3);max-width:300px;margin:0 auto 28px;line-height:1.7}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(12px);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;opacity:0;pointer-events:none;transition:opacity 0.2s;overflow-y:auto}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:22px;width:100%;max-width:540px;box-shadow:var(--shadow-lg);transform:translateY(20px) scale(0.98);transition:transform 0.25s cubic-bezier(0.22,1,0.36,1);overflow:hidden;flex-shrink:0;border:1px solid var(--border)}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-header{padding:22px 24px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600;letter-spacing:-0.2px}
+.modal-close{width:30px;height:30px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:14px}
+.modal-close:hover{background:rgba(0,0,0,0.08)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:14px 24px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--border)}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.form-input{width:100%;padding:10px 13px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:all 0.15s}
+.form-input:focus{border-color:var(--blue-border);box-shadow:0 0 0 3px var(--blue-mid);background:var(--white)}
+.form-input::placeholder{color:var(--ink3)}
+textarea.form-input{min-height:78px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.location-btn{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--blue-light);border:1px solid var(--blue-border);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.12s;margin-bottom:8px;width:100%;text-align:left}
+.location-btn:hover{background:rgba(0,113,227,0.1)}
+.location-btn-icon{font-size:17px;flex-shrink:0}
+.location-btn-title{font-size:13px;color:var(--blue);font-weight:500}
+.location-btn-sub{font-size:11px;color:var(--ink3);margin-top:1px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:14px;gap:12px}
+.toggle-title{font-size:13px;color:var(--ink);font-weight:500}
+.toggle-sub{font-size:11px;color:var(--ink3);margin-top:2px}
+.toggle-switch{position:relative;width:46px;height:26px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:#D1D1D6;border-radius:100px;transition:all 0.2s}
+.toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;bottom:3px;background:white;border-radius:50%;transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle-switch input:checked + .toggle-slider{background:var(--green)}
+.toggle-switch input:checked + .toggle-slider:before{transform:translateX(20px)}
+.tags-input-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:7px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);min-height:42px;cursor:text;transition:all 0.15s}
+.tags-input-row:focus-within{border-color:var(--blue-border);box-shadow:0 0 0 3px var(--blue-mid);background:var(--white)}
+.tag-chip{display:flex;align-items:center;gap:4px;background:var(--blue-light);color:var(--blue);padding:3px 8px;border-radius:100px;font-size:12px;font-weight:500}
+.tag-chip-remove{cursor:pointer;font-size:13px;opacity:0.6}
+.tag-chip-remove:hover{opacity:1}
+.tags-bare-input{border:none;outline:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);min-width:80px;flex:1}
+.tags-bare-input::placeholder{color:var(--ink3)}
+.photo-row{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.photo-circle{width:56px;height:56px;border-radius:16px;background:var(--bg);border:2px dashed var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;overflow:hidden;flex-shrink:0;transition:border-color 0.12s}
+.photo-circle:hover{border-color:var(--blue)}
+.photo-circle img{width:100%;height:100%;object-fit:cover;border-radius:14px}
+.photo-btn{font-size:13px;color:var(--blue);cursor:pointer;font-weight:500}
+.photo-hint{font-size:11px;color:var(--ink3);margin-top:3px}
+.btn-secondary{background:var(--bg);border:1px solid var(--border);color:var(--ink2);padding:10px 20px;border-radius:100px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.12s}
+.btn-secondary:hover{background:rgba(0,0,0,0.05);color:var(--ink)}
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.25);backdrop-filter:blur(4px);z-index:400;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.detail-overlay.open{opacity:1;pointer-events:all}
+.detail-panel{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--white);border-left:1px solid var(--border);box-shadow:-8px 0 40px rgba(0,0,0,0.08);z-index:401;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);overflow-y:auto;display:flex;flex-direction:column}
+.detail-panel.open{transform:translateX(0)}
+.detail-header{padding:24px 22px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);z-index:1}
+.detail-top{display:flex;align-items:flex-start;gap:14px}
+.detail-avatar{width:56px;height:56px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:#fff;overflow:hidden}
+.detail-name{font-family:'Lora',serif;font-size:20px;font-weight:600;letter-spacing:-0.2px;margin-bottom:3px}
+.detail-context{font-size:12px;color:var(--ink3)}
+.detail-close{margin-left:auto;width:30px;height:30px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:14px;flex-shrink:0}
+.detail-close:hover{background:rgba(0,0,0,0.08)}
+.detail-body{padding:18px 22px;flex:1}
+.detail-section{margin-bottom:20px}
+.detail-section-label{font-size:11px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.detail-location{display:flex;align-items:center;gap:7px;padding:10px 13px;background:var(--blue-light);border-radius:var(--radius-sm);color:var(--blue);font-size:13px;font-weight:500}
+.detail-hook{padding:11px 13px;background:var(--bg);border-radius:var(--radius-sm);font-size:13px;color:var(--ink2);font-style:italic;line-height:1.6;border-left:3px solid var(--blue-border)}
+.detail-notify-row{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;background:var(--bg);border-radius:var(--radius-sm)}
+.detail-notify-text{font-size:13px;color:var(--ink2)}
+.detail-notify-on{font-size:12px;color:var(--green);font-weight:600}
+.detail-notify-off{font-size:12px;color:var(--ink3)}
+.detail-facts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fact-box{padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm)}
+.fact-label{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;font-weight:600}
+.fact-value{font-size:13px;color:var(--ink);font-weight:500}
+.detail-tags{display:flex;flex-wrap:wrap;gap:6px}
+.detail-tag{font-size:12px;padding:4px 10px;border-radius:100px;background:var(--bg);color:var(--ink2)}
+.detail-notes{font-size:13px;color:var(--ink2);line-height:1.7}
+.detail-footer{padding:14px 22px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
+.btn-detail{flex:1;padding:10px;border-radius:var(--radius-xs);border:1px solid var(--border);background:var(--bg);color:var(--ink2);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.12s}
+.btn-detail:hover{background:rgba(0,0,0,0.04);color:var(--ink)}
+.btn-detail.danger:hover{background:var(--red-light);color:var(--red);border-color:rgba(255,59,48,0.2)}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(29,29,31,0.92);backdrop-filter:blur(12px);color:#fff;padding:11px 22px;border-radius:100px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all 0.2s;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:768px){.app{grid-template-columns:1fr}sidebar{display:none}main{padding:20px 16px}.people-grid{grid-template-columns:1fr}.detail-panel{width:100%}.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-plain">Name</span><span class="logo-accent">cue</span>
+  </div>
+  <div class="header-right">
+    <button class="btn-icon" onclick="showToast('Settings coming soon!')">⚙</button>
+  </div>
+</header>
+
+<div class="app">
+  <sidebar>
+    <div class="sidebar-label">Browse</div>
+    <div class="nav-item active" onclick="setView('all',this)"><span class="nav-icon">👥</span>Everyone<span class="nav-count" id="count-all">0</span></div>
+    <div class="nav-item" onclick="setView('recent',this)"><span class="nav-icon">🕐</span>Recently Added<span class="nav-count" id="count-recent">0</span></div>
+    <div class="nav-item" onclick="setView('notify',this)"><span class="nav-icon">🔔</span>Notify On Visit<span class="nav-count" id="count-notify">0</span></div>
+    <div class="nav-item" onclick="setView('birthdays',this)"><span class="nav-icon">🎂</span>Birthdays Soon<span class="nav-count" id="count-bday">0</span></div>
+    <div class="sidebar-sep"></div>
+    <div class="sidebar-label">Places</div>
+    <div id="places-list"></div>
+  </sidebar>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="page-title">Everyone</div>
+        <div class="page-subtitle" id="page-subtitle">Your full collection</div>
+      </div>
+      <button class="btn-primary" onclick="openModal()">+ Add Person</button>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search by name, place, or interests…" id="search-input" oninput="filterPeople()">
+    </div>
+    <div class="people-grid" id="people-grid"></div>
+    <div class="empty-state" id="empty-state" style="display:none">
+      <div class="empty-icon">📍</div>
+      <div class="empty-title">Start your collection</div>
+      <div class="empty-text">Add someone you've met — capture where, a memory cue, and a few details. Next time you see them, you'll be ready.</div>
+      <button class="btn-primary" style="margin:0 auto" onclick="openModal()">+ Add your first person</button>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Add Person</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="photo-row">
+        <div class="photo-circle" id="photo-preview" onclick="document.getElementById('photo-file').click()">📷</div>
+        <div>
+          <div class="photo-btn" onclick="document.getElementById('photo-file').click()">Upload a photo</div>
+          <div class="photo-hint">Optional — helps jog your memory</div>
+        </div>
+        <input type="file" id="photo-file" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First name *</label>
+          <input class="form-input" type="text" id="f-firstname" placeholder="e.g. Sarah" enterkeyhint="next" inputmode="text" onkeydown="nextField(event,'f-lastname')">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input class="form-input" type="text" id="f-lastname" placeholder="e.g. Chen" enterkeyhint="next" inputmode="text" onkeydown="nextField(event,'f-location')">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Where did you meet?</label>
+        <button class="location-btn" onclick="detectLocation()">
+          <span class="location-btn-icon">📍</span>
+          <div>
+            <div class="location-btn-title" id="loc-status">Use my current location</div>
+            <div class="location-btn-sub" id="loc-sub">Tap to detect where you are now</div>
+          </div>
+        </button>
+        <input class="form-input" type="text" id="f-location" placeholder="Or type a place name…" enterkeyhint="next" inputmode="text" onkeydown="nextField(event,'f-context')">
+      </div>
+      <div class="form-group">
+        <label class="form-label">How do you know them?</label>
+        <input class="form-input" type="text" id="f-context" placeholder="e.g. Friend of Jamie, colleague" enterkeyhint="next" inputmode="text" onkeydown="nextField(event,'f-hook')">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Memory cue 💡</label>
+        <input class="form-input" type="text" id="f-hook" placeholder="e.g. Always talks about her dog, red glasses" enterkeyhint="next" inputmode="text" onkeydown="nextField(event,'f-how')">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Birthday</label>
+          <input class="form-input" type="date" id="f-birthday" enterkeyhint="next" onkeydown="nextField(event,'f-how')">
+        </div>
+        <div class="form-group">
+          <label class="form-label">How you met</label>
+          <input class="form-input" type="text" id="f-how" placeholder="e.g. At Dan's BBQ" enterkeyhint="next" inputmode="text" onkeydown="nextField(event,'f-notes')">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Likes / interests</label>
+        <div class="tags-input-row" id="likes-row" onclick="document.getElementById('likes-input').focus()">
+          <input class="tags-bare-input" id="likes-input" placeholder="Type and press Enter…" onkeydown="addTag(event,'likes')">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dislikes / avoid</label>
+        <div class="tags-input-row" id="dislikes-row" onclick="document.getElementById('dislikes-input').focus()">
+          <input class="tags-bare-input" id="dislikes-input" placeholder="Type and press Enter…" onkeydown="addTag(event,'dislikes')">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input" id="f-notes" placeholder="Anything else worth remembering…" enterkeyhint="done"></textarea>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-title">🔔 Notify me when I visit this place</div>
+          <div class="toggle-sub">Get a reminder about this person when you're nearby</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="f-notify">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="savePerson()">Save Person</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div class="detail-top">
+      <div class="detail-avatar" id="d-avatar"></div>
+      <div>
+        <div class="detail-name" id="d-name"></div>
+        <div class="detail-context" id="d-context"></div>
+      </div>
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+    </div>
+  </div>
+  <div class="detail-body" id="detail-body"></div>
+  <div class="detail-footer">
+    <button class="btn-detail" onclick="editCurrentPerson()">Edit</button>
+    <button class="btn-detail danger" onclick="deleteCurrentPerson()">Delete</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let people=[],currentView='all',currentPersonId=null,editingId=null,photoDataUrl=null,likeTags=[],dislikeTags=[],activePlace=null;
+const AV=['av-blue','av-purple','av-pink','av-green','av-orange'];
+const av=i=>AV[i%AV.length];
+const initials=p=>((p.firstname||'?')[0]+(p.lastname?p.lastname[0]:'')).toUpperCase();
+const genId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2);
+const save=()=>{try{localStorage.setItem('namecue_v2',JSON.stringify(people))}catch(e){}};
+const load=()=>{try{const d=localStorage.getItem('namecue_v2');if(d)people=JSON.parse(d)}catch(e){}};
+load();
+
+function nextField(e,id){if(e.key==='Enter'){e.preventDefault();const n=document.getElementById(id);if(n){n.focus();n.scrollIntoView({behavior:'smooth',block:'center'})}}}
+
+function openModal(editId){
+  editingId=editId||null;photoDataUrl=null;likeTags=[];dislikeTags=[];
+  document.getElementById('likes-row').querySelectorAll('.tag-chip').forEach(e=>e.remove());
+  document.getElementById('dislikes-row').querySelectorAll('.tag-chip').forEach(e=>e.remove());
+  if(editId){
+    const p=people.find(x=>x.id===editId);if(!p)return;
+    document.getElementById('modal-title').textContent='Edit Person';
+    ['firstname','lastname','location','context','hook','birthday','how','notes'].forEach(k=>document.getElementById('f-'+k).value=p[k]||'');
+    document.getElementById('f-notify').checked=p.notify||false;
+    if(p.photo){photoDataUrl=p.photo;document.getElementById('photo-preview').innerHTML=`<img src="${p.photo}" alt="">`;}
+    else document.getElementById('photo-preview').textContent='📷';
+    (p.likes||[]).forEach(t=>insertTag('likes',t));
+    (p.dislikes||[]).forEach(t=>insertTag('dislikes',t));
+    document.getElementById('loc-status').textContent=p.location?'✓ Location set':'Use my current location';
+    document.getElementById('loc-sub').textContent=p.location||'Tap to detect where you are now';
+  } else {
+    document.getElementById('modal-title').textContent='Add Person';
+    ['firstname','lastname','location','context','hook','birthday','how','notes'].forEach(k=>document.getElementById('f-'+k).value='');
+    document.getElementById('f-notify').checked=false;
+    document.getElementById('photo-preview').textContent='📷';
+    document.getElementById('loc-status').textContent='Use my current location';
+    document.getElementById('loc-sub').textContent='Tap to detect where you are now';
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open')}
+function handleOverlayClick(e){if(e.target===document.getElementById('modal-overlay'))closeModal()}
+
+function handlePhoto(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{photoDataUrl=ev.target.result;document.getElementById('photo-preview').innerHTML=`<img src="${photoDataUrl}" alt="">`;};
+  r.readAsDataURL(file);
+}
+
+function detectLocation(){
+  const s=document.getElementById('loc-status'),sub=document.getElementById('loc-sub'),inp=document.getElementById('f-location');
+  if(!navigator.geolocation){s.textContent='Not available';sub.textContent='Please type below';inp.focus();return;}
+  s.textContent='Detecting…';sub.textContent='Allow location access if prompted';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude:lat,longitude:lng}=pos.coords;
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat.toFixed(4)}&lon=${lng.toFixed(4)}`)
+      .then(r=>r.json()).then(data=>{
+        const name=data.address?.road||data.address?.suburb||data.name||`${lat.toFixed(4)},${lng.toFixed(4)}`;
+        const city=data.address?.city||data.address?.town||data.address?.village||'';
+        const loc=city?`${name}, ${city}`:name;
+        inp.value=loc;s.textContent='✓ Location detected';sub.textContent=loc;
+      }).catch(()=>{inp.value=`${lat.toFixed(4)}, ${lng.toFixed(4)}`;s.textContent='✓ Coordinates captured';});
+  },err=>{
+    s.textContent='Location access denied';
+    sub.textContent=err.code===1?'Settings → Privacy → Location to enable':'Please type below';
+    inp.placeholder='e.g. The Anchor Bar, Renton';inp.focus();
+    showToast('Just type the place name below!');
+  },{timeout:8000});
+}
+
+function insertTag(type,text){
+  const row=document.getElementById(type+'-row'),input=document.getElementById(type+'-input');
+  const chip=document.createElement('div');chip.className='tag-chip';
+  chip.innerHTML=`${text}<span class="tag-chip-remove" onclick="removeTag(this,'${type}','${text.replace(/'/g,"\\'")}')">×</span>`;
+  row.insertBefore(chip,input);
+  if(type==='likes')likeTags.push(text);else dislikeTags.push(text);
+}
+
+function addTag(e,type){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();const val=e.target.value.trim().replace(/,$/,'');if(!val)return;
+    const arr=type==='likes'?likeTags:dislikeTags;
+    if(arr.includes(val)){e.target.value='';return;}
+    insertTag(type,val);e.target.value='';
+  }
+}
+
+function removeTag(el,type,text){
+  el.parentElement.remove();
+  if(type==='likes')likeTags=likeTags.filter(t=>t!==text);else dislikeTags=dislikeTags.filter(t=>t!==text);
+}
+
+function savePerson(){
+  const firstname=document.getElementById('f-firstname').value.trim();
+  if(!firstname){showToast('Please enter at least a first name');return;}
+  const p={
+    id:editingId||genId(),firstname,
+    lastname:document.getElementById('f-lastname').value.trim(),
+    location:document.getElementById('f-location').value.trim(),
+    context:document.getElementById('f-context').value.trim(),
+    hook:document.getElementById('f-hook').value.trim(),
+    birthday:document.getElementById('f-birthday').value,
+    how:document.getElementById('f-how').value.trim(),
+    notes:document.getElementById('f-notes').value.trim(),
+    notify:document.getElementById('f-notify').checked,
+    likes:[...likeTags],dislikes:[...dislikeTags],photo:photoDataUrl,
+    addedAt:editingId?(people.find(x=>x.id===editingId)||{}).addedAt||Date.now():Date.now(),
+    avatarIdx:editingId?(people.find(x=>x.id===editingId)||{}).avatarIdx??Math.floor(Math.random()*5):Math.floor(Math.random()*5),
+  };
+  if(editingId){const i=people.findIndex(x=>x.id===editingId);if(i>=0)people[i]=p;}
+  else people.unshift(p);
+  save();closeModal();render();
+  showToast(editingId?'Person updated!':`${firstname} added to Namecue!`);
+  editingId=null;
+}
+
+function openDetail(id){
+  const p=people.find(x=>x.id===id);if(!p)return;
+  currentPersonId=id;
+  const av_el=document.getElementById('d-avatar');
+  av_el.className=`detail-avatar ${p.photo?'':av(p.avatarIdx||0)}`;
+  av_el.innerHTML=p.photo?`<img src="${p.photo}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:16px">`:initials(p);
+  document.getElementById('d-name').textContent=[p.firstname,p.lastname].filter(Boolean).join(' ');
+  document.getElementById('d-context').textContent=p.context||(p.how?`Met: ${p.how}`:'');
+  let html='';
+  if(p.location)html+=`<div class="detail-section"><div class="detail-section-label">Where you met</div><div class="detail-location">📍 ${p.location}</div></div>`;
+  html+=`<div class="detail-section"><div class="detail-section-label">Location notification</div><div class="detail-notify-row"><span class="detail-notify-text">Notify when nearby</span><span class="${p.notify?'detail-notify-on':'detail-notify-off'}">${p.notify?'🔔 On':'Off'}</span></div></div>`;
+  if(p.hook)html+=`<div class="detail-section"><div class="detail-section-label">Memory cue</div><div class="detail-hook">${p.hook}</div></div>`;
+  const facts=[];
+  if(p.how)facts.push({label:'How you met',value:p.how});
+  if(p.birthday)facts.push({label:'Birthday',value:new Date(p.birthday+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})});
+  if(facts.length)html+=`<div class="detail-section"><div class="detail-section-label">Key facts</div><div class="detail-facts">${facts.map(f=>`<div class="fact-box"><div class="fact-label">${f.label}</div><div class="fact-value">${f.value}</div></div>`).join('')}</div></div>`;
+  if(p.likes?.length)html+=`<div class="detail-section"><div class="detail-section-label">Likes</div><div class="detail-tags">${p.likes.map(t=>`<span class="detail-tag" style="background:var(--green-light);color:var(--green)">✓ ${t}</span>`).join('')}</div></div>`;
+  if(p.dislikes?.length)html+=`<div class="detail-section"><div class="detail-section-label">Dislikes</div><div class="detail-tags">${p.dislikes.map(t=>`<span class="detail-tag" style="background:var(--red-light);color:var(--red)">✗ ${t}</span>`).join('')}</div></div>`;
+  if(p.notes)html+=`<div class="detail-section"><div class="detail-section-label">Notes</div><div class="detail-notes">${p.notes}</div></div>`;
+  html+=`<div class="detail-section"><div class="detail-section-label">Added</div><div class="detail-notes">${new Date(p.addedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div>`;
+  document.getElementById('detail-body').innerHTML=html;
+  document.getElementById('detail-overlay').classList.add('open');
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function closeDetail(){
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.getElementById('detail-panel').classList.remove('open');
+}
+function editCurrentPerson(){closeDetail();setTimeout(()=>openModal(currentPersonId),300)}
+function deleteCurrentPerson(){
+  const p=people.find(x=>x.id===currentPersonId);
+  people=people.filter(x=>x.id!==currentPersonId);
+  save();closeDetail();render();
+  showToast(`${p?.firstname||'Person'} removed`);
+}
+
+function daysUntilBirthday(d){
+  if(!d)return Infinity;
+  const today=new Date(),bday=new Date(d+'T00:00:00');
+  const next=new Date(today.getFullYear(),bday.getMonth(),bday.getDate());
+  if(next<today)next.setFullYear(today.getFullYear()+1);
+  return Math.ceil((next-today)/86400000);
+}
+
+function getPlaces(){
+  const counts={};
+  people.forEach(p=>{if(p.location){const k=p.location.split(',')[0].trim();counts[k]=(counts[k]||0)+1;}});
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+}
+
+function setView(view,el){
+  currentView=view;activePlace=null;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.place-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  filterPeople();
+}
+
+function setPlace(place,el){
+  currentView='place';activePlace=place;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.place-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.getElementById('page-title').textContent=place;
+  document.getElementById('page-subtitle').textContent='People you met here';
+  filterPeople();
+}
+
+function filterPeople(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  let filtered=[...people];
+  if(q)filtered=filtered.filter(p=>[p.firstname,p.lastname,p.location,p.context,p.notes,p.hook,p.how,...(p.likes||[]),...(p.dislikes||[])].filter(Boolean).join(' ').toLowerCase().includes(q));
+  if(currentView==='recent'){filtered=filtered.filter(p=>p.addedAt>=Date.now()-30*86400000);document.getElementById('page-title').textContent='Recently Added';document.getElementById('page-subtitle').textContent='In the last 30 days';}
+  else if(currentView==='notify'){filtered=filtered.filter(p=>p.notify);document.getElementById('page-title').textContent='Notify On Visit';document.getElementById('page-subtitle').textContent="You'll get a reminder when you're nearby";}
+  else if(currentView==='birthdays'){filtered=filtered.filter(p=>p.birthday&&daysUntilBirthday(p.birthday)<=30).sort((a,b)=>daysUntilBirthday(a.birthday)-daysUntilBirthday(b.birthday));document.getElementById('page-title').textContent='Birthdays Soon';document.getElementById('page-subtitle').textContent='In the next 30 days';}
+  else if(currentView==='place'&&activePlace){filtered=filtered.filter(p=>p.location&&p.location.startsWith(activePlace));}
+  else if(currentView==='all'){document.getElementById('page-title').textContent='Everyone';document.getElementById('page-subtitle').textContent=`${people.length} ${people.length===1?'person':'people'} in your collection`;}
+  renderCards(filtered);
+}
+
+function render(){
+  document.getElementById('count-all').textContent=people.length;
+  document.getElementById('count-recent').textContent=people.filter(p=>p.addedAt>=Date.now()-30*86400000).length;
+  document.getElementById('count-notify').textContent=people.filter(p=>p.notify).length;
+  document.getElementById('count-bday').textContent=people.filter(p=>p.birthday&&daysUntilBirthday(p.birthday)<=30).length;
+  const places=getPlaces();
+  document.getElementById('places-list').innerHTML=places.slice(0,10).map(([place,count])=>`
+    <div class="place-item ${activePlace===place?'active':''}" onclick="setPlace('${place.replace(/'/g,"\\'")}',this)">
+      <div class="place-dot"></div>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${place}</span>
+      <span style="font-size:11px;color:var(--ink3);font-weight:500">${count}</span>
+    </div>`).join('')||`<div style="padding:8px 12px;font-size:12px;color:var(--ink3)">No places yet</div>`;
+  filterPeople();
+}
+
+function renderCards(filtered){
+  const grid=document.getElementById('people-grid'),empty=document.getElementById('empty-state');
+  if(!filtered.length){
+    grid.innerHTML='';
+    empty.style.display=people.length?'none':'block';
+    if(people.length)grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:60px 20px"><div style="font-size:36px;margin-bottom:12px;opacity:0.2">🔍</div><div style="font-size:15px;color:var(--ink2);font-weight:500">No matches found</div><div style="font-size:13px;color:var(--ink3);margin-top:6px">Try a different search</div></div>`;
+    return;
+  }
+  empty.style.display='none';
+  grid.innerHTML=filtered.map((p,i)=>{
+    const name=[p.firstname,p.lastname].filter(Boolean).join(' ');
+    const dtb=p.birthday?daysUntilBirthday(p.birthday):Infinity;
+    const bdayBadge=dtb<=7?`<span class="tag bday">🎂 ${dtb===0?'Today!':dtb===1?'Tomorrow':`${dtb}d`}</span>`:'';
+    const avatarContent=p.photo?`<img src="${p.photo}" alt="${name}">`:initials(p);
+    return `<div class="person-card" onclick="openDetail('${p.id}')" style="animation-delay:${i*0.035}s">
+      ${p.notify?`<div class="notify-badge">🔔</div>`:''}
+      <div class="card-top">
+        <div class="avatar ${p.photo?'':av(p.avatarIdx||0)}">${avatarContent}</div>
+        <div class="card-info">
+          <div class="card-name">${name}</div>
+          <div class="card-context">${p.context||p.how||'<span style="color:var(--ink3)">No context yet</span>'}</div>
+        </div>
+      </div>
+      ${p.location?`<div class="card-location">📍 ${p.location}</div>`:''}
+      ${p.hook?`<div class="card-hook">${p.hook}</div>`:''}
+      <div class="card-tags">
+        ${bdayBadge}
+        ${(p.likes||[]).slice(0,2).map(t=>`<span class="tag like">${t}</span>`).join('')}
+        ${(p.dislikes||[]).slice(0,1).map(t=>`<span class="tag dislike">✗ ${t}</span>`).join('')}
+        ${(p.likes||[]).length>2?`<span class="tag">+${(p.likes||[]).length-2}</span>`:''}
+      </div>
+      <div class="card-footer">
+        <div class="card-date">${new Date(p.addedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+        ${p.notify?`<span class="card-notify-label">🔔 notify</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+if(!people.length){
+  people=[
+    {id:genId(),firstname:'James',lastname:'Okafor',location:'The Anchor Bar, Renton',context:'Friend of a colleague',hook:'Loud laugh, always has a whisky recommendation',how:'Work Christmas party',birthday:'1988-03-22',likes:['Whisky','Rugby','Cooking'],dislikes:['Football'],notes:'Works in finance, moving to Seattle next year.',notify:true,photo:null,addedAt:Date.now()-5*86400000,avatarIdx:1},
+    {id:genId(),firstname:'Priya',lastname:'Sharma',location:'Fusion Yoga Studio',context:'From yoga class',hook:'Always wears colourful headbands',how:'Monday morning class',birthday:'1993-11-08',likes:['Yoga','Baking','Travel'],dislikes:[],notes:'Runs a small bakery on weekends.',notify:false,photo:null,addedAt:Date.now()-12*86400000,avatarIdx:3},
+    {id:genId(),firstname:'Tom',lastname:'Berridge',location:'Cedar Park, Renton',context:"Neighbour's friend",hook:'Red beard, walks a golden retriever called Biscuit',how:'Bumped into at the park',birthday:'',likes:['Dogs','Hiking','Craft beer'],dislikes:['Loud parties'],notes:'Teacher at the local school.',notify:true,photo:null,addedAt:Date.now()-20*86400000,avatarIdx:0},
+    {id:genId(),firstname:'Linda',lastname:'',location:'Renton Library',context:'Library volunteer',hook:'Silver hair, always reading historical fiction',how:'Book club meeting',birthday:'1955-06-30',likes:['Historical fiction','Gardening','Tea'],dislikes:['Sci-fi'],notes:'Runs the Thursday book club.',notify:false,photo:null,addedAt:Date.now()-3*86400000,avatarIdx:4},
+  ];
+  save();
+}
+render();
+</script>
+</body>
+</html>
