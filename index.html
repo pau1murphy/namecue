@@ -209,11 +209,57 @@ textarea.form-input{min-height:78px;resize:vertical}
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(29,29,31,0.92);backdrop-filter:blur(12px);color:#fff;padding:11px 22px;border-radius:100px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all 0.2s;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:768px){.app{grid-template-columns:1fr}sidebar{display:none}main{padding:20px 16px}.people-grid{grid-template-columns:1fr}.detail-panel{width:100%}.form-row{grid-template-columns:1fr}}
+
+.splash-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;transition:opacity 0.3s}
+.splash-screen.hide{opacity:0;pointer-events:none}
+.splash-logo{font-family:'Lora',serif;font-size:32px;font-weight:600;margin-bottom:8px}
+.splash-logo span{color:var(--blue);font-style:italic;font-weight:500}
+.splash-tagline{font-size:13px;color:var(--ink3);margin-bottom:32px}
+.splash-spinner{width:24px;height:24px;border:2.5px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite}
+
+.category-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.category-pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:100px;border:1px solid var(--border);background:var(--bg);color:var(--ink2);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.12s;user-select:none}
+.category-pill:hover{border-color:var(--blue-border);color:var(--blue)}
+.category-pill.selected{background:var(--blue-light);border-color:var(--blue-border);color:var(--blue)}
+.category-pill .pill-emoji{font-size:13px}
+.add-category-row{display:flex;gap:8px;margin-top:8px}
+.add-category-input{flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:100px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:all 0.15s}
+.add-category-input:focus{border-color:var(--blue-border);box-shadow:0 0 0 3px var(--blue-mid);background:var(--white)}
+.add-category-input::placeholder{color:var(--ink3)}
+.add-category-btn{padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:100px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.12s}
+.add-category-btn:hover{background:#0077ED}
+.manage-categories-link{font-size:12px;color:var(--blue);cursor:pointer;margin-top:6px;display:inline-block}
+.manage-categories-link:hover{text-decoration:underline}
+
+/* CATEGORIES MODAL */
+.cat-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(12px);z-index:600;display:flex;align-items:center;justify-content:center;padding:40px 20px;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.cat-modal-overlay.open{opacity:1;pointer-events:all}
+.cat-modal{background:var(--white);border-radius:22px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);transform:translateY(20px) scale(0.98);transition:transform 0.25s cubic-bezier(0.22,1,0.36,1);overflow:hidden;border:1px solid var(--border)}
+.cat-modal-overlay.open .cat-modal{transform:translateY(0) scale(1)}
+.cat-modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.cat-modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600}
+.cat-modal-body{padding:20px 24px;max-height:400px;overflow-y:auto}
+.cat-modal-footer{padding:14px 24px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
+.cat-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:8px}
+.cat-list-item-left{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink)}
+.cat-delete-btn{width:26px;height:26px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:14px;transition:all 0.12s}
+.cat-delete-btn:hover{background:var(--red-light);color:var(--red)}
+
+/* CARD CATEGORIES */
+.card-categories{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.card-category{font-size:11px;font-weight:500;padding:2px 8px;border-radius:100px;background:var(--blue-light);color:var(--blue)}
 </style>
 </head>
 <body>
 
 <!-- AUTH SCREEN -->
+
+<div class="splash-screen" id="splash-screen">
+  <div class="splash-logo">Name<span>cue</span></div>
+  <div class="splash-tagline">Meet. Remember. Repeat.</div>
+  <div class="splash-spinner"></div>
+</div>
+
 <div class="auth-screen" id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
@@ -323,6 +369,11 @@ textarea.form-input{min-height:78px;resize:vertical}
         </div>
         <input type="file" id="photo-file" accept="image/*" style="display:none" onchange="handlePhoto(event)">
       </div>
+      <div class="form-group">
+        <label class="form-label">Categories</label>
+        <div class="category-pills" id="form-category-pills"></div>
+        <span class="manage-categories-link" onclick="openCatModal()">⚙ Manage categories</span>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">First name *</label>
@@ -416,6 +467,28 @@ textarea.form-input{min-height:78px;resize:vertical}
   </div>
 </div>
 
+
+<!-- CATEGORIES MODAL -->
+<div class="cat-modal-overlay" id="cat-modal-overlay" onclick="handleCatOverlayClick(event)">
+  <div class="cat-modal">
+    <div class="cat-modal-header">
+      <div class="cat-modal-title">Manage Categories</div>
+      <button class="modal-close" onclick="closeCatModal()">✕</button>
+    </div>
+    <div class="cat-modal-body">
+      <div id="cat-list"></div>
+      <div class="add-category-row">
+        <input class="add-category-input" type="text" id="new-cat-input" placeholder="e.g. 🏋️ Gym buddy" enterkeyhint="done" onkeydown="if(event.key==='Enter')addCategory()">
+        <button class="add-category-btn" onclick="addCategory()">Add</button>
+      </div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:8px">Tip: start with an emoji for a personal touch!</div>
+    </div>
+    <div class="cat-modal-footer">
+      <button class="btn-primary" onclick="closeCatModal()">Done</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -431,6 +504,82 @@ const AV=['av-blue','av-purple','av-pink','av-green','av-orange'];
 const av=i=>AV[i%AV.length];
 const initials=p=>((p.firstname||'?')[0]+(p.lastname?p.lastname[0]:'')).toUpperCase();
 const genId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2);
+
+
+// CATEGORIES
+const DEFAULT_CATEGORIES = ['👫 Friend','💼 Colleague','🍽️ Restaurant / Bar staff','🏋️ Gym','🏘️ Neighbour','👨‍👩‍👧 Family'];
+let selectedCategories = [];
+
+function loadCategories(){
+  const stored = localStorage.getItem('namecue_categories');
+  return stored ? JSON.parse(stored) : [...DEFAULT_CATEGORIES];
+}
+
+function saveCategories(cats){
+  localStorage.setItem('namecue_categories', JSON.stringify(cats));
+}
+
+function renderFormCategories(){
+  const cats = loadCategories();
+  const container = document.getElementById('form-category-pills');
+  container.innerHTML = cats.map(cat=>`
+    <div class="category-pill ${selectedCategories.includes(cat)?'selected':''}" onclick="toggleCategory('${cat.replace(/'/g,"\'")}')">
+      <span>${cat}</span>
+    </div>`).join('');
+}
+
+function toggleCategory(cat){
+  if(selectedCategories.includes(cat)){
+    selectedCategories = selectedCategories.filter(c=>c!==cat);
+  } else {
+    selectedCategories.push(cat);
+  }
+  renderFormCategories();
+}
+
+function openCatModal(){
+  renderCatList();
+  document.getElementById('cat-modal-overlay').classList.add('open');
+}
+
+function closeCatModal(){
+  document.getElementById('cat-modal-overlay').classList.remove('open');
+  renderFormCategories();
+}
+
+function handleCatOverlayClick(e){
+  if(e.target===document.getElementById('cat-modal-overlay'))closeCatModal();
+}
+
+function renderCatList(){
+  const cats = loadCategories();
+  document.getElementById('cat-list').innerHTML = cats.length ? cats.map((cat,i)=>`
+    <div class="cat-list-item">
+      <div class="cat-list-item-left">${cat}</div>
+      <button class="cat-delete-btn" onclick="deleteCategory(${i})">✕</button>
+    </div>`).join('') : '<div style="font-size:13px;color:var(--ink3);margin-bottom:12px">No categories yet — add one below!</div>';
+}
+
+function addCategory(){
+  const input = document.getElementById('new-cat-input');
+  const val = input.value.trim();
+  if(!val) return;
+  const cats = loadCategories();
+  if(cats.includes(val)){input.value='';return;}
+  cats.push(val);
+  saveCategories(cats);
+  input.value='';
+  renderCatList();
+}
+
+function deleteCategory(idx){
+  const cats = loadCategories();
+  const removed = cats[idx];
+  cats.splice(idx,1);
+  saveCategories(cats);
+  selectedCategories = selectedCategories.filter(c=>c!==removed);
+  renderCatList();
+}
 
 // AUTH
 function switchTab(tab){
@@ -487,8 +636,88 @@ async function forgotPassword(){
   else showToast('Password reset email sent!');
 }
 
+
+// CATEGORIES
+const DEFAULT_CATEGORIES = ['👫 Friend','💼 Colleague','🍽️ Restaurant / Bar staff','🏋️ Gym','🏘️ Neighbour','👨‍👩‍👧 Family'];
+let selectedCategories = [];
+
+function loadCategories(){
+  const stored = localStorage.getItem('namecue_categories');
+  return stored ? JSON.parse(stored) : [...DEFAULT_CATEGORIES];
+}
+
+function saveCategories(cats){
+  localStorage.setItem('namecue_categories', JSON.stringify(cats));
+}
+
+function renderFormCategories(){
+  const cats = loadCategories();
+  const container = document.getElementById('form-category-pills');
+  container.innerHTML = cats.map(cat=>`
+    <div class="category-pill ${selectedCategories.includes(cat)?'selected':''}" onclick="toggleCategory('${cat.replace(/'/g,"\'")}')">
+      <span>${cat}</span>
+    </div>`).join('');
+}
+
+function toggleCategory(cat){
+  if(selectedCategories.includes(cat)){
+    selectedCategories = selectedCategories.filter(c=>c!==cat);
+  } else {
+    selectedCategories.push(cat);
+  }
+  renderFormCategories();
+}
+
+function openCatModal(){
+  renderCatList();
+  document.getElementById('cat-modal-overlay').classList.add('open');
+}
+
+function closeCatModal(){
+  document.getElementById('cat-modal-overlay').classList.remove('open');
+  renderFormCategories();
+}
+
+function handleCatOverlayClick(e){
+  if(e.target===document.getElementById('cat-modal-overlay'))closeCatModal();
+}
+
+function renderCatList(){
+  const cats = loadCategories();
+  document.getElementById('cat-list').innerHTML = cats.length ? cats.map((cat,i)=>`
+    <div class="cat-list-item">
+      <div class="cat-list-item-left">${cat}</div>
+      <button class="cat-delete-btn" onclick="deleteCategory(${i})">✕</button>
+    </div>`).join('') : '<div style="font-size:13px;color:var(--ink3);margin-bottom:12px">No categories yet — add one below!</div>';
+}
+
+function addCategory(){
+  const input = document.getElementById('new-cat-input');
+  const val = input.value.trim();
+  if(!val) return;
+  const cats = loadCategories();
+  if(cats.includes(val)){input.value='';return;}
+  cats.push(val);
+  saveCategories(cats);
+  input.value='';
+  renderCatList();
+}
+
+function deleteCategory(idx){
+  const cats = loadCategories();
+  const removed = cats[idx];
+  cats.splice(idx,1);
+  saveCategories(cats);
+  selectedCategories = selectedCategories.filter(c=>c!==removed);
+  renderCatList();
+}
+
 // AUTH STATE
 sb.auth.onAuthStateChange(async(event,session)=>{
+  setTimeout(()=>{
+    const splash=document.getElementById('splash-screen');
+    if(splash){splash.classList.add('hide');setTimeout(()=>splash.style.display='none',300);}
+  }, 800);
   if(session?.user){
     currentUser=session.user;
     document.getElementById('auth-screen').style.display='none';
@@ -516,7 +745,7 @@ async function loadPeople(){
       id:p.id, firstname:p.firstname, lastname:p.lastname||'',
       location:p.location||'', context:p.context||'', hook:p.hook||'',
       birthday:p.birthday||'', how:p.how||'', notes:p.notes||'',
-      notify:p.notify||false, likes:p.likes||[], dislikes:p.dislikes||[],
+      notify:p.notify||false, categories:p.categories||[], likes:p.likes||[], dislikes:p.dislikes||[],
       photo:p.photo||null, avatarIdx:p.avatar_idx||0,
       addedAt:new Date(p.created_at).getTime()
     }));
@@ -545,6 +774,7 @@ async function savePerson(){
     how:document.getElementById('f-how').value.trim(),
     notes:document.getElementById('f-notes').value.trim(),
     notify:document.getElementById('f-notify').checked,
+    categories:selectedCategories,
     likes:likeTags, dislikes:dislikeTags,
     photo:photoDataUrl, avatar_idx:avatarIdx,
     user_id:currentUser.id
@@ -580,11 +810,13 @@ function openModal(editId){
   document.getElementById('likes-row').querySelectorAll('.tag-chip').forEach(e=>e.remove());
   document.getElementById('dislikes-row').querySelectorAll('.tag-chip').forEach(e=>e.remove());
   document.getElementById('save-btn').textContent='Save Person';
+  selectedCategories=[];
   if(editId){
     const p=people.find(x=>x.id===editId);if(!p)return;
     document.getElementById('modal-title').textContent='Edit Person';
     ['firstname','lastname','location','context','hook','birthday','how','notes'].forEach(k=>document.getElementById('f-'+k).value=p[k]||'');
     document.getElementById('f-notify').checked=p.notify||false;
+    selectedCategories=[...(p.categories||[])];
     if(p.photo){photoDataUrl=p.photo;document.getElementById('photo-preview').innerHTML=`<img src="${p.photo}" alt="">`;}
     else document.getElementById('photo-preview').textContent='📷';
     (p.likes||[]).forEach(t=>insertTag('likes',t));
@@ -595,10 +827,12 @@ function openModal(editId){
     document.getElementById('modal-title').textContent='Add Person';
     ['firstname','lastname','location','context','hook','birthday','how','notes'].forEach(k=>document.getElementById('f-'+k).value='');
     document.getElementById('f-notify').checked=false;
+    selectedCategories=[];
     document.getElementById('photo-preview').textContent='📷';
     document.getElementById('loc-status').textContent='Use my current location';
     document.getElementById('loc-sub').textContent='Tap to detect where you are now';
   }
+  renderFormCategories();
   document.getElementById('modal-overlay').classList.add('open');
 }
 
@@ -666,6 +900,7 @@ function openDetail(id){
   let html='';
   if(p.location)html+=`<div class="detail-section"><div class="detail-section-label">Where you met</div><div class="detail-location">📍 ${p.location}</div></div>`;
   html+=`<div class="detail-section"><div class="detail-section-label">Location notification</div><div class="detail-notify-row"><span class="detail-notify-text">Notify when nearby</span><span class="${p.notify?'detail-notify-on':'detail-notify-off'}">${p.notify?'🔔 On':'Off'}</span></div></div>`;
+  if(p.categories?.length)html+=`<div class="detail-section"><div class="detail-section-label">Categories</div><div class="detail-tags">${p.categories.map(c=>`<span class="detail-tag" style="background:var(--blue-light);color:var(--blue)">${c}</span>`).join('')}</div></div>`;
   if(p.hook)html+=`<div class="detail-section"><div class="detail-section-label">Memory cue</div><div class="detail-hook">${p.hook}</div></div>`;
   const facts=[];
   if(p.how)facts.push({label:'How you met',value:p.how});
@@ -721,7 +956,7 @@ function setPlace(place,el){
 function filterPeople(){
   const q=document.getElementById('search-input').value.toLowerCase();
   let filtered=[...people];
-  if(q)filtered=filtered.filter(p=>[p.firstname,p.lastname,p.location,p.context,p.notes,p.hook,p.how,...(p.likes||[]),...(p.dislikes||[])].filter(Boolean).join(' ').toLowerCase().includes(q));
+  if(q)filtered=filtered.filter(p=>[p.firstname,p.lastname,p.location,p.context,p.notes,p.hook,p.how,...(p.likes||[]),...(p.dislikes||[]),...(p.categories||[])].filter(Boolean).join(' ').toLowerCase().includes(q));
   if(currentView==='recent'){filtered=filtered.filter(p=>p.addedAt>=Date.now()-30*86400000);document.getElementById('page-title').textContent='Recently Added';document.getElementById('page-subtitle').textContent='In the last 30 days';}
   else if(currentView==='notify'){filtered=filtered.filter(p=>p.notify);document.getElementById('page-title').textContent='Notify On Visit';document.getElementById('page-subtitle').textContent="You'll get a reminder when you're nearby";}
   else if(currentView==='birthdays'){filtered=filtered.filter(p=>p.birthday&&daysUntilBirthday(p.birthday)<=30).sort((a,b)=>daysUntilBirthday(a.birthday)-daysUntilBirthday(b.birthday));document.getElementById('page-title').textContent='Birthdays Soon';document.getElementById('page-subtitle').textContent='In the next 30 days';}
@@ -768,6 +1003,7 @@ function renderCards(filtered){
           <div class="card-context">${p.context||p.how||'<span style="color:var(--ink3)">No context yet</span>'}</div>
         </div>
       </div>
+      ${p.categories?.length?`<div class="card-categories">${p.categories.map(c=>`<span class="card-category">${c}</span>`).join('')}</div>`:''}
       ${p.location?`<div class="card-location">📍 ${p.location}</div>`:''}
       ${p.hook?`<div class="card-hook">${p.hook}</div>`:''}
       <div class="card-tags">
