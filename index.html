@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Namecue</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Lora:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root {
   --bg:#F5F5F7;--white:#FFFFFF;--ink:#1D1D1F;--ink2:#6E6E73;--ink3:#AEAEB2;
@@ -507,16 +507,24 @@ async function loadPeople(){
   document.getElementById('loading-state').style.display='block';
   document.getElementById('people-grid').style.display='none';
   document.getElementById('empty-state').style.display='none';
-  const {data,error}=await sb.from('people').select('*').order('created_at',{ascending:false});
-  if(error){showToast('Error loading data');console.error(error);return;}
-  people=(data||[]).map(p=>({
-    id:p.id, firstname:p.firstname, lastname:p.lastname||'',
-    location:p.location||'', context:p.context||'', hook:p.hook||'',
-    birthday:p.birthday||'', how:p.how||'', notes:p.notes||'',
-    notify:p.notify||false, likes:p.likes||[], dislikes:p.dislikes||[],
-    photo:p.photo||null, avatarIdx:p.avatar_idx||0,
-    addedAt:new Date(p.created_at).getTime()
-  }));
+  try {
+    const timeout = new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),8000));
+    const query = sb.from('people').select('*').order('created_at',{ascending:false});
+    const {data,error} = await Promise.race([query, timeout]);
+    if(error) throw error;
+    people=(data||[]).map(p=>({
+      id:p.id, firstname:p.firstname, lastname:p.lastname||'',
+      location:p.location||'', context:p.context||'', hook:p.hook||'',
+      birthday:p.birthday||'', how:p.how||'', notes:p.notes||'',
+      notify:p.notify||false, likes:p.likes||[], dislikes:p.dislikes||[],
+      photo:p.photo||null, avatarIdx:p.avatar_idx||0,
+      addedAt:new Date(p.created_at).getTime()
+    }));
+  } catch(e) {
+    console.error(e);
+    document.getElementById('loading-state').innerHTML='<div style="color:var(--ink3);font-size:14px">Could not load data. Check your connection and <span style="color:var(--blue);cursor:pointer;text-decoration:underline" onclick="loadPeople()">try again</span>.</div>';
+    return;
+  }
   document.getElementById('loading-state').style.display='none';
   document.getElementById('people-grid').style.display='grid';
   render();
