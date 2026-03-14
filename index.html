@@ -163,9 +163,33 @@ textarea.form-input{min-height:78px;resize:vertical}
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(29,29,31,0.92);backdrop-filter:blur(12px);color:#fff;padding:11px 22px;border-radius:100px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all 0.2s;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:768px){.app{grid-template-columns:1fr}sidebar{display:none}main{padding:20px 16px}.people-grid{grid-template-columns:1fr}.detail-panel{width:100%}.form-row{grid-template-columns:1fr}}
+
+.lock-screen{position:fixed;inset:0;background:#F5F5F7;display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.lock-card{background:#fff;border-radius:22px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 12px 40px rgba(0,0,0,0.12);padding:40px 36px;width:100%;max-width:360px;text-align:center}
+.lock-icon{font-size:40px;margin-bottom:16px}
+.lock-title{font-family:'Lora',serif;font-size:24px;font-weight:600;color:#1D1D1F;margin-bottom:6px;letter-spacing:-0.3px}
+.lock-sub{font-size:13px;color:#AEAEB2;margin-bottom:28px}
+.lock-input{width:100%;padding:12px 16px;background:#F5F5F7;border:1px solid rgba(0,0,0,0.1);border-radius:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:#1D1D1F;outline:none;text-align:center;letter-spacing:2px;transition:all 0.15s;margin-bottom:12px}
+.lock-input:focus{border-color:rgba(0,113,227,0.4);box-shadow:0 0 0 3px rgba(0,113,227,0.12);background:#fff}
+.lock-input::placeholder{letter-spacing:0;color:#AEAEB2}
+.lock-btn{width:100%;padding:12px;background:#0071E3;color:#fff;border:none;border-radius:100px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.15s;margin-bottom:0}
+.lock-btn:hover{background:#0077ED;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,113,227,0.3)}
+.lock-btn:active{transform:scale(0.97)}
+.lock-error{font-size:13px;color:#FF3B30;margin-top:10px;min-height:18px}
 </style>
 </head>
 <body>
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title">Namecue</div>
+    <div class="lock-sub">This app is private. Enter the password to continue.</div>
+    <input class="lock-input" type="password" id="lock-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPassword()">
+    <button class="lock-btn" onclick="checkPassword()">Unlock</button>
+    <div class="lock-error" id="lock-error"></div>
+  </div>
+</div>
+
 
 <header>
   <div class="logo">
@@ -586,6 +610,33 @@ if(!people.length){
   save();
 }
 render();
+
+(function(){
+  var PASS = 'francoandsherman';
+  var KEY = 'namecue_auth';
+  function checkPassword(){
+    var val = document.getElementById('lock-input').value;
+    if(val === PASS){
+      sessionStorage.setItem(KEY,'1');
+      document.getElementById('lock-screen').style.display='none';
+      document.getElementById('lock-error').textContent='';
+    } else {
+      document.getElementById('lock-error').textContent='Incorrect password — try again';
+      document.getElementById('lock-input').value='';
+      document.getElementById('lock-input').focus();
+    }
+  }
+  window.checkPassword = checkPassword;
+  if(sessionStorage.getItem(KEY)!=='1'){
+    document.addEventListener('DOMContentLoaded',function(){
+      document.getElementById('lock-screen').style.display='flex';
+    });
+  } else {
+    document.addEventListener('DOMContentLoaded',function(){
+      document.getElementById('lock-screen').style.display='none';
+    });
+  }
+})();
 </script>
 </body>
 </html>
