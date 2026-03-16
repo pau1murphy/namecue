@@ -183,7 +183,7 @@ textarea.form-input{min-height:78px;resize:vertical}
 .detail-overlay.open{opacity:1;pointer-events:all}
 .detail-overlay.open .detail-panel{transform:translateX(0)}
 @media(max-width:768px){.detail-overlay.open .detail-panel{transform:translateY(0)}
-  .detail-panel{top:auto !important;height:92vh}}
+  .detail-panel{top:auto !important;height:92vh;border-radius:22px 22px 0 0;padding-top:env(safe-area-inset-top)}}
 .detail-panel{position:fixed;right:0;top:60px;bottom:0;width:380px;background:var(--white);border-left:1px solid var(--border);box-shadow:-8px 0 40px rgba(0,0,0,0.08);z-index:401;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);overflow-y:auto;display:flex;flex-direction:column}
 .detail-panel.open{transform:translateX(0)}
 .detail-header{padding:24px 22px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);z-index:1}
@@ -404,7 +404,8 @@ textarea.form-input{min-height:78px;resize:vertical}
 .place-fave-badge{position:absolute;top:10px;right:10px;font-size:14px}
 
 /* HOME SCREEN */
-.home-screen{display:none;position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px 80px;gap:24px;background:var(--bg);z-index:200;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.home-screen{display:none;position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px 40px;gap:24px;background:var(--bg);z-index:200;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.home-screen::-webkit-scrollbar{display:none}
 .home-screen.active{display:flex}
 .home-logo{font-family:'Lora',serif;font-size:32px;font-weight:700;letter-spacing:-0.5px;text-align:center}
 .home-logo span{color:var(--blue);font-style:italic;font-weight:500}
@@ -441,7 +442,7 @@ textarea.form-input{min-height:78px;resize:vertical}
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
     <div class="auth-tagline">The people you meet. The places you love.</div>
-    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.7.4</div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.7.6</div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Create account</button>
@@ -513,7 +514,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     </div>
     <div class="header-right">
       <div class="user-badge"><div class="user-dot"></div><span id="user-email-display"></span></div>
-      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.7.4</span><button class="btn-signout" onclick="signOut()">Sign out</button>
+      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.7.6</span><button class="btn-signout" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
@@ -1321,6 +1322,7 @@ function openDetail(id){
   bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Added</div><div class="detail-notes">${new Date(p.addedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div>`;
 
   document.getElementById('detail-content').innerHTML=`
+    <div style="display:flex;justify-content:center;padding:10px 0 4px"><div style="width:36px;height:4px;border-radius:2px;background:var(--border-strong)"></div></div>
     <div class="detail-header">
       <div style="display:flex;align-items:center;gap:14px">
         <div class="home-result-avatar ${p.photo?'':av(p.avatarIdx||0)}" style="width:52px;height:52px;font-size:18px;border-radius:14px">${avatarHtml}</div>
@@ -1724,6 +1726,7 @@ function openPlaceDetail(id){
   const overlay=document.getElementById('detail-overlay');
   const content=document.getElementById('detail-content');
   content.innerHTML=`
+    <div style="display:flex;justify-content:center;padding:10px 0 4px"><div style="width:36px;height:4px;border-radius:2px;background:var(--border-strong)"></div></div>
     <div class="detail-header">
       <div style="display:flex;align-items:center;gap:14px">
         <div class="place-card-icon" style="width:52px;height:52px;font-size:26px">${p.category?p.category.split(' ')[0]:'📍'}</div>
