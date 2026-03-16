@@ -183,10 +183,10 @@ textarea.form-input{min-height:78px;resize:vertical}
 .detail-overlay.open{opacity:1;pointer-events:all}
 .detail-overlay.open .detail-panel{transform:translateX(0)}
 @media(max-width:768px){.detail-overlay.open .detail-panel{transform:translateY(0)}
-  .detail-panel{top:auto !important;height:92vh;border-radius:22px 22px 0 0;padding-top:env(safe-area-inset-top)}}
+  .detail-panel{top:auto !important;height:92vh;border-radius:22px 22px 0 0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}}
 .detail-panel{position:fixed;right:0;top:60px;bottom:0;width:380px;background:var(--white);border-left:1px solid var(--border);box-shadow:-8px 0 40px rgba(0,0,0,0.08);z-index:401;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);overflow-y:auto;display:flex;flex-direction:column}
 .detail-panel.open{transform:translateX(0)}
-.detail-header{padding:24px 22px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);z-index:1}
+.detail-header{padding:28px 22px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);z-index:1}
 .detail-top{display:flex;align-items:flex-start;gap:14px}
 .detail-avatar{width:56px;height:56px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Lora',serif;font-size:20px;font-weight:600;color:#fff;overflow:hidden}
 .detail-name{font-family:'Lora',serif;font-size:20px;font-weight:600;letter-spacing:-0.2px;margin-bottom:3px}
@@ -404,9 +404,9 @@ textarea.form-input{min-height:78px;resize:vertical}
 .place-fave-badge{position:absolute;top:10px;right:10px;font-size:14px}
 
 /* HOME SCREEN */
-.home-screen{display:none;position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px 40px;gap:24px;background:var(--bg);z-index:200;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.home-screen::-webkit-scrollbar{display:none}
+.home-screen{display:none;position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px 40px;gap:24px;background:var(--bg);z-index:200;overflow:hidden}
 .home-screen.active{display:flex}
+.home-screen{padding-top:max(80px, calc(60px + env(safe-area-inset-top)))}
 .home-logo{font-family:'Lora',serif;font-size:32px;font-weight:700;letter-spacing:-0.5px;text-align:center}
 .home-logo span{color:var(--blue);font-style:italic;font-weight:500}
 .home-toggle{display:flex;background:var(--bg);border-radius:100px;padding:4px;gap:4px;border:1px solid var(--border)}
@@ -442,7 +442,7 @@ textarea.form-input{min-height:78px;resize:vertical}
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
     <div class="auth-tagline">The people you meet. The places you love.</div>
-    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.7.6</div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.7.7</div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Create account</button>
@@ -514,7 +514,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     </div>
     <div class="header-right">
       <div class="user-badge"><div class="user-dot"></div><span id="user-email-display"></span></div>
-      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.7.6</span><button class="btn-signout" onclick="signOut()">Sign out</button>
+      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.7.7</span><button class="btn-signout" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
@@ -1315,7 +1315,7 @@ function openDetail(id){
   if(p.hook)bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Memory cue 💡</div><div class="detail-notes">${p.hook}</div></div>`;
   if(p.categories?.length)bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Categories</div><div class="detail-tags">${p.categories.map(c=>`<span class="detail-tag" style="background:var(--blue-light);color:var(--blue)">${c}</span>`).join('')}</div></div>`;
   if(p.birthday)bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Birthday</div><div class="detail-notes">${new Date(p.birthday+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div>`;
-  if(p.how)bodyHtml+=`<div class="detail-section"><div class="detail-section-label">How you met</div><div class="detail-notes">${p.how}</div></div>`;
+
   if(p.likes?.length)bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Likes</div><div class="detail-tags">${p.likes.map(t=>`<span class="detail-tag" style="background:var(--green-light,#e8f8f0);color:#1a7f4b">✓ ${t}</span>`).join('')}</div></div>`;
   if(p.dislikes?.length)bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Dislikes</div><div class="detail-tags">${p.dislikes.map(t=>`<span class="detail-tag" style="background:var(--red-light,#fef1f1);color:var(--red)">✗ ${t}</span>`).join('')}</div></div>`;
   if(p.notes)bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Notes</div><div class="detail-notes">${p.notes}</div></div>`;
