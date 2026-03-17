@@ -40,6 +40,11 @@ body{font-family:'Nunito',-apple-system,sans-serif;background:var(--bg);color:va
 .auth-input{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Nunito',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:all 0.15s}
 .auth-input:focus{border-color:var(--blue-border);box-shadow:0 0 0 3px var(--blue-mid);background:var(--white)}
 .auth-input::placeholder{color:var(--ink3)}
+.pw-wrap{position:relative;display:flex;align-items:center}
+.pw-wrap .auth-input{padding-right:40px}
+.pw-eye{position:absolute;right:0;top:0;bottom:0;width:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink3);border:none;background:transparent;border-radius:0 var(--radius-sm) var(--radius-sm) 0;-webkit-user-select:none;user-select:none;touch-action:none}
+.pw-eye:hover{color:var(--ink2)}
+.pw-eye svg{pointer-events:none}
 .auth-btn{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:100px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.15s;margin-top:8px}
 .auth-btn:hover{background:#0077ED;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,113,227,0.3)}
 .auth-btn:active{transform:scale(0.97)}
@@ -438,7 +443,7 @@ textarea.form-input{min-height:78px;resize:vertical}
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
     <div class="auth-tagline">The people you meet. The places you love.</div>
-    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.2</div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.3</div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Create account</button>
@@ -452,11 +457,31 @@ textarea.form-input{min-height:78px;resize:vertical}
       </div>
       <div class="auth-form-group">
         <label class="auth-label">Password</label>
-        <input class="auth-input" type="password" id="signin-password" placeholder="Your password" enterkeyhint="go" onkeydown="if(event.key==='Enter')signIn()">
+        <div class="pw-wrap"><input class="auth-input" type="password" id="signin-password" placeholder="Your password" enterkeyhint="go" onkeydown="if(event.key==='Enter')signIn()"><button class="pw-eye" onmousedown="peekPw('signin-password',true)" onmouseup="peekPw('signin-password',false)" onmouseleave="peekPw('signin-password',false)" ontouchstart="peekPw('signin-password',true)" ontouchend="peekPw('signin-password',false)" tabindex="-1" aria-label="Hold to show password">👁</button></div>
       </div>
       <div class="auth-error" id="signin-error"></div>
       <button class="auth-btn" onclick="signIn()" id="signin-btn">Sign in</button>
       <span class="forgot-link" onclick="forgotPassword()">Forgot your password?</span>
+    </div>
+
+    <!-- RESET PASSWORD (shown when user clicks link from email) -->
+    <div id="reset-form" style="display:none">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:28px;margin-bottom:8px">🔑</div>
+        <div style="font-size:15px;font-weight:600;color:var(--ink)">Set a new password</div>
+        <div style="font-size:13px;color:var(--ink3);margin-top:4px">Choose something you'll remember</div>
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-label">New password</label>
+        <div class="pw-wrap"><input class="auth-input" type="password" id="reset-password" placeholder="At least 6 characters" enterkeyhint="next" onkeydown="if(event.key==='Enter')document.getElementById('reset-confirm').focus()"><button class="pw-eye" onmousedown="peekPw('reset-password',true)" onmouseup="peekPw('reset-password',false)" onmouseleave="peekPw('reset-password',false)" ontouchstart="peekPw('reset-password',true)" ontouchend="peekPw('reset-password',false)" tabindex="-1" aria-label="Hold to show password">👁</button></div>
+      </div>
+      <div class="auth-form-group">
+        <label class="auth-label">Confirm new password</label>
+        <div class="pw-wrap"><input class="auth-input" type="password" id="reset-confirm" placeholder="Type it again" enterkeyhint="go" onkeydown="if(event.key==='Enter')setNewPassword()"><button class="pw-eye" onmousedown="peekPw('reset-confirm',true)" onmouseup="peekPw('reset-confirm',false)" onmouseleave="peekPw('reset-confirm',false)" ontouchstart="peekPw('reset-confirm',true)" ontouchend="peekPw('reset-confirm',false)" tabindex="-1" aria-label="Hold to show password">👁</button></div>
+      </div>
+      <div class="auth-error" id="reset-error"></div>
+      <div class="auth-success" id="reset-success"></div>
+      <button class="auth-btn" onclick="setNewPassword()" id="reset-btn">Save new password</button>
     </div>
 
     <!-- SIGN UP -->
@@ -467,11 +492,11 @@ textarea.form-input{min-height:78px;resize:vertical}
       </div>
       <div class="auth-form-group">
         <label class="auth-label">Password</label>
-        <input class="auth-input" type="password" id="signup-password" placeholder="At least 6 characters" enterkeyhint="next" onkeydown="if(event.key==='Enter')document.getElementById('signup-confirm').focus()">
+        <div class="pw-wrap"><input class="auth-input" type="password" id="signup-password" placeholder="At least 6 characters" enterkeyhint="next" onkeydown="if(event.key==='Enter')document.getElementById('signup-confirm').focus()"><button class="pw-eye" onmousedown="peekPw('signup-password',true)" onmouseup="peekPw('signup-password',false)" onmouseleave="peekPw('signup-password',false)" ontouchstart="peekPw('signup-password',true)" ontouchend="peekPw('signup-password',false)" tabindex="-1" aria-label="Hold to show password">👁</button></div>
       </div>
       <div class="auth-form-group">
         <label class="auth-label">Confirm password</label>
-        <input class="auth-input" type="password" id="signup-confirm" placeholder="Type your password again" enterkeyhint="go" onkeydown="if(event.key==='Enter')signUp()">
+        <div class="pw-wrap"><input class="auth-input" type="password" id="signup-confirm" placeholder="Type your password again" enterkeyhint="go" onkeydown="if(event.key==='Enter')signUp()"><button class="pw-eye" onmousedown="peekPw('signup-confirm',true)" onmouseup="peekPw('signup-confirm',false)" onmouseleave="peekPw('signup-confirm',false)" ontouchstart="peekPw('signup-confirm',true)" ontouchend="peekPw('signup-confirm',false)" tabindex="-1" aria-label="Hold to show password">👁</button></div>
       </div>
       <div class="auth-error" id="signup-error"></div>
       <div class="auth-success" id="signup-success"></div>
@@ -510,7 +535,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     </div>
     <div class="header-right">
       <div class="user-badge"><div class="user-dot"></div><span id="user-email-display"></span></div>
-      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.2</span><button class="btn-signout" onclick="signOut()">Sign out</button>
+      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.3</span><button class="btn-signout" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
@@ -1076,17 +1101,88 @@ function signOut(){
   try{switchTab('signin');}catch(e){}
 }
 
+function peekPw(id, show){
+  const el = document.getElementById(id);
+  if(el) el.type = show ? 'text' : 'password';
+}
+
 async function forgotPassword(){
   const email=document.getElementById('signin-email').value.trim();
   if(!email){document.getElementById('signin-error').textContent='Enter your email first';return;}
-  try {
-    const r = await fetch(`${SUPABASE_URL}/auth/v1/recover`,{
+  const errEl=document.getElementById('signin-error');
+  const forgotLink=document.querySelector('.forgot-link');
+  errEl.textContent='';
+  if(forgotLink){forgotLink.textContent='Sending…';forgotLink.style.pointerEvents='none';}
+  const reset=()=>{if(forgotLink){forgotLink.textContent='Forgot your password?';forgotLink.style.color='';forgotLink.style.pointerEvents='';}};
+  async function tryRecover(body){
+    const r=await fetch(`${SUPABASE_URL}/auth/v1/recover`,{
       method:'POST',
       headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({email})
+      body:JSON.stringify(body)
     });
-    showToast('Password reset email sent!');
-  } catch(e){ document.getElementById('signin-error').textContent=e.message; }
+    const d=await r.json(); // read once, store
+    return {ok:r.ok, data:d};
+  }
+  try {
+    const redirectTo=window.location.href.split('#')[0];
+    // First attempt: with redirect_to so the link comes back to the app
+    let {ok,data}=await tryRecover({email,redirect_to:redirectTo});
+    // If redirect URL isn't whitelisted in Supabase, retry without it
+    if(!ok){
+      const msg=(data.error_description||data.msg||data.message||'').toLowerCase();
+      if(msg.includes('redirect')||msg.includes('not allowed')||msg.includes('invalid')||msg.includes('url')){
+        const retry=await tryRecover({email});
+        ok=retry.ok; data=retry.data;
+      }
+    }
+    if(!ok) throw new Error(data.error_description||data.message||'Could not send reset email');
+    showToast('Reset email sent! Check your inbox 📬');
+    if(forgotLink){forgotLink.textContent='Email sent ✓';forgotLink.style.color='var(--green)';}
+    setTimeout(reset,5000);
+  } catch(e){
+    errEl.textContent=e.message;
+    reset();
+  }
+}
+
+// Called after user clicks the reset link in their email
+let _recoveryToken = null;
+
+async function setNewPassword(){
+  const password=document.getElementById('reset-password').value;
+  const confirm=document.getElementById('reset-confirm').value;
+  const errEl=document.getElementById('reset-error');
+  const successEl=document.getElementById('reset-success');
+  const btn=document.getElementById('reset-btn');
+  errEl.textContent=''; successEl.textContent='';
+  if(password.length<6){errEl.textContent='Password must be at least 6 characters';return;}
+  if(password!==confirm){errEl.textContent='Passwords do not match';return;}
+  if(!_recoveryToken){errEl.textContent='Session expired — please request a new reset link';return;}
+  btn.disabled=true; btn.textContent='Saving…';
+  try {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/user`,{
+      method:'PUT',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${_recoveryToken}`,'Content-Type':'application/json'},
+      body:JSON.stringify({password})
+    });
+    const data = await r.json();
+    if(!r.ok) throw new Error(data.error_description || data.message || 'Could not update password');
+    _recoveryToken = null;
+    successEl.textContent='Password updated! You can now sign in.';
+    btn.textContent='Password saved ✓';
+    // Clear hash from URL so refresh doesn't re-trigger recovery mode
+    history.replaceState(null,'',window.location.pathname);
+    // After 2s, show sign-in form
+    setTimeout(()=>{
+      document.getElementById('reset-form').style.display='none';
+      document.getElementById('signin-form').style.display='block';
+      document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+      btn.disabled=false; btn.textContent='Save new password';
+    }, 2000);
+  } catch(e){
+    errEl.textContent=e.message;
+    btn.disabled=false; btn.textContent='Save new password';
+  }
 }
 
 
@@ -1104,6 +1200,24 @@ function showApp(){
 }
 
 (async()=>{
+  // Check if this is a password recovery redirect (Supabase puts token in URL hash)
+  const hash = window.location.hash;
+  if(hash && hash.includes('type=recovery')){
+    const params = new URLSearchParams(hash.replace(/^#/,''));
+    const token = params.get('access_token');
+    if(token){
+      _recoveryToken = token;
+      // Show auth screen in reset mode
+      document.getElementById('auth-screen').style.display='flex';
+      document.getElementById('main-app').style.display='none';
+      document.getElementById('signin-form').style.display='none';
+      document.getElementById('signup-form').style.display='none';
+      document.getElementById('reset-form').style.display='block';
+      document.querySelectorAll('.auth-tab').forEach(t=>t.style.display='none');
+      return; // Don't proceed with normal session restore
+    }
+  }
+
   const session = await nc.init();
   if(session?.user){
     currentUser = session.user;
