@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Namecue">
 <meta name="theme-color" content="#F5F5F7">
@@ -443,7 +445,7 @@ textarea.form-input{min-height:78px;resize:vertical}
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
     <div class="auth-tagline">The people you meet. The places you love.</div>
-    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.3.1</div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.7</div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Create account</button>
@@ -535,7 +537,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     </div>
     <div class="header-right">
       <div class="user-badge"><div class="user-dot"></div><span id="user-email-display"></span></div>
-      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.3.1</span><button class="btn-signout" onclick="signOut()">Sign out</button>
+      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.7</span><button class="btn-signout" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
@@ -694,6 +696,21 @@ textarea.form-input{min-height:78px;resize:vertical}
             <input class="tags-bare-input" id="dislikes-input" placeholder="Type and press Enter…" onkeydown="addTag(event,'dislikes')">
           </div>
         </div>
+        <div class="form-group">
+          <label class="form-label">📍 Linked place <span style="color:var(--ink3);font-weight:400;font-size:12px">optional</span></label>
+          <input type="hidden" id="f-place-id" value="">
+          <div style="position:relative">
+            <input class="form-input" type="text" id="f-place-search" placeholder="Search places…" autocomplete="off"
+              oninput="placeTypeahead(this.value)"
+              onfocus="placeTypeahead(this.value)"
+              onblur="setTimeout(()=>hidePlaceDropdown(),200)">
+            <div id="f-place-chip" style="display:none;margin-top:6px;display:none;align-items:center;gap:6px;background:var(--blue-light);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--blue)">
+              <span id="f-place-chip-name"></span>
+              <span onclick="clearPlaceLink()" style="cursor:pointer;font-size:16px;line-height:1;color:var(--ink3);margin-left:auto">×</span>
+            </div>
+            <div id="f-place-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);z-index:600;max-height:200px;overflow-y:auto;margin-top:4px"></div>
+          </div>
+        </div>
         <div class="form-group" style="display:flex;align-items:center;gap:12px">
           <input type="checkbox" id="f-notify" style="width:16px;height:16px;accent-color:var(--blue)">
           <label for="f-notify" style="font-size:14px;color:var(--ink2);cursor:pointer">🔔 Notify when nearby</label>
@@ -741,14 +758,15 @@ textarea.form-input{min-height:78px;resize:vertical}
       <div class="form-group">
         <label class="form-label">Category</label>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="place-category-pills">
-          <button type="button" class="place-cat-btn" data-cat="🍕 Food" onclick="togglePlaceCat(this)">🍕 Food</button>
-          <button type="button" class="place-cat-btn" data-cat="☕ Coffee" onclick="togglePlaceCat(this)">☕ Coffee</button>
-          <button type="button" class="place-cat-btn" data-cat="🍸 Drinks" onclick="togglePlaceCat(this)">🍸 Drinks</button>
+          <button type="button" class="place-cat-btn" data-cat="🍽️ Restaurant" onclick="togglePlaceCat(this)">🍽️ Restaurant</button>
+          <button type="button" class="place-cat-btn" data-cat="🍸 Bar" onclick="togglePlaceCat(this)">🍸 Bar</button>
+          <button type="button" class="place-cat-btn" data-cat="☕ Cafe" onclick="togglePlaceCat(this)">☕ Cafe</button>
           <button type="button" class="place-cat-btn" data-cat="🛍️ Shopping" onclick="togglePlaceCat(this)">🛍️ Shopping</button>
-          <button type="button" class="place-cat-btn" data-cat="🌿 Nature" onclick="togglePlaceCat(this)">🌿 Nature</button>
+          <button type="button" class="place-cat-btn" data-cat="🌿 Outdoors" onclick="togglePlaceCat(this)">🌿 Outdoors</button>
           <button type="button" class="place-cat-btn" data-cat="🎭 Culture" onclick="togglePlaceCat(this)">🎭 Culture</button>
-          <button type="button" class="place-cat-btn" data-cat="💪 Fitness" onclick="togglePlaceCat(this)">💪 Fitness</button>
+          <button type="button" class="place-cat-btn" data-cat="🏋️ Health & Fitness" onclick="togglePlaceCat(this)">🏋️ Health & Fitness</button>
           <button type="button" class="place-cat-btn" data-cat="🏨 Stay" onclick="togglePlaceCat(this)">🏨 Stay</button>
+          <button type="button" class="place-cat-btn" data-cat="🏥 Services" onclick="togglePlaceCat(this)">🏥 Services</button>
           <button type="button" class="place-cat-btn" data-cat="💼 Work" onclick="togglePlaceCat(this)">💼 Work</button>
           <button type="button" class="place-cat-btn" data-cat="🎲 Other" onclick="togglePlaceCat(this)">🎲 Other</button>
         </div>
@@ -926,7 +944,7 @@ const nc = {
 };
 
 let people=[], currentView='all', currentPersonId=null;
-let editingId=null, photoDataUrl=null, likeTags=[], dislikeTags=[], activePlace=null;
+let editingId=null, photoDataUrl=null, likeTags=[], dislikeTags=[], activePlace=null, _modalOpenTime=0;
 let currentUser=null;
 
 const AV=['av-blue','av-purple','av-pink','av-green','av-orange'];
@@ -1258,7 +1276,7 @@ async function loadPeople(){
       location:p.location||'', context:p.context||'', hook:p.hook||'',
       birthday:p.birthday||'', how:p.how||'', notes:p.notes||'',
       notify:p.notify||false, categories:p.categories||[], likes:p.likes||[], dislikes:p.dislikes||[],
-      photo:p.photo||null, avatarIdx:p.avatar_idx||0,
+      photo:p.photo||null, avatarIdx:p.avatar_idx||0, placeId:p.place_id||null,
       addedAt:new Date(p.created_at).getTime()
     }));
   } catch(e) {
@@ -1285,12 +1303,12 @@ async function savePerson(){
     context:document.getElementById('f-context').value.trim(),
     hook:document.getElementById('f-hook').value.trim(),
     birthday:document.getElementById('f-birthday').value||null,
-    how:'',
+    
     notes:document.getElementById('f-notes').value.trim(),
     notify:document.getElementById('f-notify').checked,
     categories:selectedCategories,
     likes:likeTags, dislikes:dislikeTags,
-    photo:photoDataUrl, avatar_idx:avatarIdx,
+    photo:photoDataUrl, avatar_idx:avatarIdx, place_id:document.getElementById('f-place-id').value||null,
     user_id:currentUser.id
   };
   try {
@@ -1322,6 +1340,76 @@ async function deleteCurrentPerson(){
 // UI HELPERS
 function nextField(e,id){if(e.key==='Enter'){e.preventDefault();const n=document.getElementById(id);if(n){n.focus();n.scrollIntoView({behavior:'smooth',block:'center'})}}}
 
+function populatePlacePicker(selectedPlaceId){
+  // Reset typeahead state
+  const hid = document.getElementById('f-place-id');
+  const inp = document.getElementById('f-place-search');
+  const chip = document.getElementById('f-place-chip');
+  const chipName = document.getElementById('f-place-chip-name');
+  if(!hid || !inp) return;
+  if(selectedPlaceId){
+    const pl = (places||[]).find(x=>x.id===selectedPlaceId);
+    if(pl){
+      hid.value = pl.id;
+      inp.value = '';
+      inp.style.display = 'none';
+      chipName.textContent = (pl.category?pl.category.split(' ')[0]+' ':'')+pl.name;
+      chip.style.display = 'flex';
+      return;
+    }
+  }
+  hid.value = '';
+  inp.value = '';
+  inp.style.display = '';
+  chip.style.display = 'none';
+}
+
+function placeTypeahead(val){
+  const dropdown = document.getElementById('f-place-dropdown');
+  if(!dropdown) return;
+  const q = val.toLowerCase().trim();
+  const matches = (places||[])
+    .filter(pl=>(pl.name||'').toLowerCase().includes(q) || (pl.address||'').toLowerCase().includes(q))
+    .slice(0,8);
+  if(!matches.length){
+    dropdown.style.display = 'none';
+    return;
+  }
+  dropdown.innerHTML = matches.map(pl=>{
+    const icon = pl.category?pl.category.split(' ')[0]+' ':'📍 ';
+    const addr = pl.address?`<div style="font-size:11px;color:var(--ink3)">${pl.address}</div>`:'';
+    return `<div onclick="selectPlaceLink('${pl.id}','${(icon+pl.name).replace(/'/g,"\'")}')"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border)"
+      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <div style="font-size:14px;color:var(--ink)">${icon}${pl.name}</div>${addr}
+    </div>`;
+  }).join('');
+  dropdown.style.display = 'block';
+}
+
+function selectPlaceLink(id, label){
+  document.getElementById('f-place-id').value = id;
+  document.getElementById('f-place-search').style.display = 'none';
+  document.getElementById('f-place-search').value = '';
+  document.getElementById('f-place-chip-name').textContent = label;
+  document.getElementById('f-place-chip').style.display = 'flex';
+  document.getElementById('f-place-dropdown').style.display = 'none';
+}
+
+function clearPlaceLink(){
+  document.getElementById('f-place-id').value = '';
+  document.getElementById('f-place-search').style.display = '';
+  document.getElementById('f-place-search').value = '';
+  document.getElementById('f-place-chip').style.display = 'none';
+  document.getElementById('f-place-dropdown').style.display = 'none';
+  document.getElementById('f-place-search').focus();
+}
+
+function hidePlaceDropdown(){
+  const d = document.getElementById('f-place-dropdown');
+  if(d) d.style.display = 'none';
+}
+
 function openModal(editId){
   editingId=editId||null;photoDataUrl=null;likeTags=[];dislikeTags=[];
   document.getElementById('likes-row').querySelectorAll('.tag-chip').forEach(e=>e.remove());
@@ -1329,13 +1417,14 @@ function openModal(editId){
   document.getElementById('save-btn').textContent='Save Person';
   selectedCategories=[];
   if(editId){
-    const p=people.find(x=>x.id===editId);if(!p)return;
+    const p=people.find(x=>x.id===editId);
+    if(!p){ console.warn('openModal: person not found', editId); return; }
     document.getElementById('modal-title').textContent='Edit CueCard';
-    // Expand all fields when editing
     document.getElementById('more-details-section').style.display='block';
     document.getElementById('more-details-btn').innerHTML='<span id="more-details-arrow" style="transition:transform 0.2s;display:inline-block;transform:rotate(90deg)">▶</span> Less details';
-    ['firstname','lastname','location','context','hook','birthday','how','notes'].forEach(k=>document.getElementById('f-'+k).value=p[k]||'');
+    ['firstname','lastname','location','context','hook','birthday','notes'].forEach(k=>document.getElementById('f-'+k).value=p[k]||'');
     document.getElementById('f-notify').checked=p.notify||false;
+    populatePlacePicker(p.placeId||'');
     selectedCategories=[...(p.categories||[])];
     if(p.photo){photoDataUrl=p.photo;document.getElementById('photo-preview').innerHTML=`<img src="${p.photo}" alt="">`;}
     else document.getElementById('photo-preview').textContent='📷';
@@ -1345,11 +1434,11 @@ function openModal(editId){
     document.getElementById('loc-sub').textContent=p.location||'Tap to detect where you are now';
   } else {
     document.getElementById('modal-title').textContent='New CueCard';
-    // Collapse extra fields for new entries
     document.getElementById('more-details-section').style.display='none';
     document.getElementById('more-details-btn').innerHTML='<span id="more-details-arrow" style="transition:transform 0.2s;display:inline-block">▶</span> More details';
-    ['firstname','lastname','location','context','hook','birthday','how','notes'].forEach(k=>document.getElementById('f-'+k).value='');
+    ['firstname','lastname','location','context','hook','birthday','notes'].forEach(k=>document.getElementById('f-'+k).value='');
     document.getElementById('f-notify').checked=false;
+    populatePlacePicker('');
     selectedCategories=[];
     document.getElementById('photo-preview').textContent='📷';
     document.getElementById('loc-status').textContent='Use my current location';
@@ -1357,10 +1446,13 @@ function openModal(editId){
   }
   renderFormCategories();
   document.getElementById('modal-overlay').classList.add('open');
+  _modalOpenTime=Date.now();
 }
 
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open')}
-function handleOverlayClick(e){if(e.target===document.getElementById('modal-overlay'))closeModal()}
+function handleOverlayClick(e){
+  if(e.target===document.getElementById('modal-overlay')&&_modalOpenTime&&Date.now()-_modalOpenTime>300) closeModal();
+}
 
 function handlePhoto(e){
   const file=e.target.files[0];if(!file)return;
@@ -1429,6 +1521,14 @@ function openDetail(id){
   if(p.likes?.length)bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Likes</div><div class="detail-tags">${p.likes.map(t=>`<span class="detail-tag" style="background:var(--green-light,#e8f8f0);color:#1a7f4b">✓ ${t}</span>`).join('')}</div></div>`;
   if(p.dislikes?.length)bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Dislikes</div><div class="detail-tags">${p.dislikes.map(t=>`<span class="detail-tag" style="background:var(--red-light,#fef1f1);color:var(--red)">✗ ${t}</span>`).join('')}</div></div>`;
   if(p.notes)bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Notes</div><div class="detail-notes">${p.notes}</div></div>`;
+  // Linked place
+  if(p.placeId){
+    const linkedPlace = places.find(x=>x.id===p.placeId);
+    if(linkedPlace){
+      const icon = linkedPlace.category?linkedPlace.category.split(' ')[0]:'📍';
+      bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Linked place</div><div class="detail-notes" style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--blue)" onclick="closeDetail();setTimeout(()=>openPlaceDetail('${linkedPlace.id}'),300)">${icon} ${linkedPlace.name}<span style="font-size:11px;color:var(--ink3)">${linkedPlace.address?'· '+linkedPlace.address:''}</span></div></div>`;
+    }
+  }
   bodyHtml+=`<div class="detail-section"><div class="detail-section-label">Added</div><div class="detail-notes">${new Date(p.addedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div>`;
 
   document.getElementById('detail-content').innerHTML=`
@@ -1445,8 +1545,8 @@ function openDetail(id){
     </div>
     <div class="detail-body">${bodyHtml}</div>
     <div class="detail-footer">
-      <button class="btn-detail" onclick="editCurrentPerson()">Edit</button>
-      <button class="btn-detail danger" onclick="deleteCurrentPerson()">Delete</button>
+      <button class="btn-detail" onclick="event.stopPropagation();editCurrentPerson()">Edit</button>
+      <button class="btn-detail danger" onclick="event.stopPropagation();deleteCurrentPerson()">Delete</button>
     </div>`;
   document.getElementById('detail-overlay').classList.add('open');
 }
@@ -1458,7 +1558,7 @@ function handleDetailOverlayClick(e){
 function closeDetail(){
   document.getElementById('detail-overlay').classList.remove('open');
 }
-function editCurrentPerson(){closeDetail();setTimeout(()=>openPersonModal(currentPersonId),300)}
+function editCurrentPerson(){const id=currentPersonId;openPersonModal(id);setTimeout(()=>closeDetail(),50);}
 
 function daysUntilBirthday(d){
   if(!d)return Infinity;
@@ -1506,13 +1606,14 @@ function render(){
   const locCount=new Set(people.filter(p=>p.location).map(p=>p.location)).size;
   document.getElementById('count-bylocation').textContent=locCount;
   updatePlaceCounts();
-  const places=getPlaces();
-  document.getElementById('places-list').innerHTML=places.slice(0,10).map(([place,count])=>`
+  const _plEl=document.getElementById('places-list');
+  if(_plEl){ const places=getPlaces();
+  _plEl.innerHTML=places.slice(0,10).map(([place,count])=>`
     <div class="place-item ${activePlace===place?'active':''}" onclick="setPlace('${place.replace(/'/g,"\\'")}',this)">
       <div class="place-dot"></div>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${place}</span>
       <span style="font-size:11px;color:var(--ink3);font-weight:500">${count}</span>
-    </div>`).join('')||`<div style="padding:8px 12px;font-size:12px;color:var(--ink3)">No places yet</div>`;
+    </div>`).join('')||`<div style="padding:8px 12px;font-size:12px;color:var(--ink3)">No places yet</div>`; }
 }
 
 function renderCards(filtered){
@@ -1603,7 +1704,7 @@ async function saveQuickAdd(){
     lastname:'',
     location:document.getElementById('q-location').value.trim(),
     hook:document.getElementById('q-hook').value.trim(),
-    context:'', how:'', notes:'', birthday:null,
+    context:'',  notes:'', birthday:null,
     notify:false, categories:[], likes:[], dislikes:[],
     photo:null, avatar_idx:avatarIdx,
     user_id:currentUser.id
@@ -1709,10 +1810,10 @@ function renderPlaces(){
   if(currentPlaceView==='recent') filtered=filtered.filter(p=>p.addedAt>=Date.now()-30*86400000);
   if(currentPlaceView==='faves') filtered=filtered.filter(p=>p.favourite);
   if(search) filtered=filtered.filter(p=>
-    p.name.toLowerCase().includes(search)||
-    p.address.toLowerCase().includes(search)||
-    p.notes.toLowerCase().includes(search)||
-    p.category.toLowerCase().includes(search)
+    (p.name||'').toLowerCase().includes(search)||
+    (p.address||'').toLowerCase().includes(search)||
+    (p.notes||'').toLowerCase().includes(search)||
+    (p.category||'').toLowerCase().includes(search)
   );
 
   // Update page title
@@ -1739,7 +1840,7 @@ function renderPlaces(){
   grid.style.display='grid';
 
   const catIcon=(cat)=>{
-    const map={'🍕 Food':'🍕','☕ Coffee':'☕','🍸 Drinks':'🍸','🛍️ Shopping':'🛍️','🌿 Nature':'🌿','🎭 Culture':'🎭','💪 Fitness':'💪','🏨 Stay':'🏨','💼 Work':'💼','🎲 Other':'🎲'};
+    const map={'🍽️ Restaurant':'🍽️','🍸 Bar':'🍸','☕ Cafe':'☕','🛍️ Shopping':'🛍️','🌿 Outdoors':'🌿','🎭 Culture':'🎭','🏋️ Health & Fitness':'🏋️','🏨 Stay':'🏨','🏥 Services':'🏥','💼 Work':'💼','🎲 Other':'🎲'};
     return map[cat]||'📍';
   };
 
@@ -1833,6 +1934,106 @@ async function savePlaceCard(){
 }
 
 // -- Detail view (simple — reuse detail overlay) --
+
+function personTypeahead(val, placeId){
+  const dropdown = document.getElementById('place-person-dropdown');
+  if(!dropdown) return;
+  const q = val.toLowerCase().trim();
+  // Show all unlinked people, or filter by query
+  const matches = (people||[])
+    .filter(p=>{
+      const name = ((p.firstname||'')+' '+(p.lastname||'')).toLowerCase();
+      return (!q || name.includes(q));
+    })
+    .slice(0,8);
+  if(!matches.length){
+    dropdown.innerHTML = '<div style="padding:10px 14px;font-size:13px;color:var(--ink3)">No people found</div>';
+    dropdown.style.display = 'block';
+    return;
+  }
+  dropdown.innerHTML = matches.map(p=>{
+    const name = p.firstname+(p.lastname?' '+p.lastname:'');
+    const initials = ((p.firstname||'?')[0]+(p.lastname?p.lastname[0]:'')).toUpperCase();
+    const avClass = p.photo?'':av(p.avatarIdx||0);
+    const avatar = p.photo
+      ? `<img src="${p.photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0">`
+      : `<div class="home-result-avatar ${avClass}" style="width:28px;height:28px;font-size:11px;border-radius:50%;flex-shrink:0">${initials}</div>`;
+    const alreadyLinked = p.placeId === placeId;
+    return `<div onclick="${alreadyLinked?'':(`linkPersonToPlace('${p.id}','${placeId}')`)}"
+      style="padding:8px 14px;cursor:${alreadyLinked?'default':'pointer'};border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;opacity:${alreadyLinked?'0.5':'1'}"
+      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      ${avatar}
+      <div>
+        <div style="font-size:13px;color:var(--ink)">${name}</div>
+        ${alreadyLinked?'<div style="font-size:11px;color:var(--ink3)">Already linked here</div>':''}
+        ${p.placeId&&!alreadyLinked?'<div style="font-size:11px;color:var(--ink3)">Currently linked elsewhere</div>':''}
+      </div>
+    </div>`;
+  }).join('');
+  dropdown.style.display = 'block';
+}
+
+function hidePersonDropdown(){
+  const d = document.getElementById('place-person-dropdown');
+  if(d) d.style.display = 'none';
+}
+
+async function linkPersonToPlace(personId, placeId){
+  hidePersonDropdown();
+  const inp = document.getElementById('place-person-search');
+  if(inp) inp.value = '';
+  try {
+    await nc.fetch(`people?id=eq.${personId}`,{method:'PATCH',body:JSON.stringify({place_id:placeId})});
+    // Update local data
+    const p = people.find(x=>x.id===personId);
+    if(p) p.placeId = placeId;
+    const pl = places.find(x=>x.id===placeId);
+    showToast(`${p?p.firstname:'Person'} linked to ${pl?pl.name:'place'}!`);
+    // Refresh the place detail to show updated people list
+    openPlaceDetail(placeId);
+  } catch(e){
+    showToast('Error linking person');
+    console.error(e);
+  }
+}
+
+function openNewPersonAtPlace(placeId){
+  // Open new person modal with place pre-selected
+  openModal(null);
+  // After modal opens, pre-select the place
+  setTimeout(()=>{
+    document.getElementById('more-details-section').style.display = 'block';
+    document.getElementById('more-details-btn').innerHTML = '<span id="more-details-arrow" style="transition:transform 0.2s;display:inline-block;transform:rotate(90deg)">▶</span> Less details';
+    const pl = places.find(x=>x.id===placeId);
+    if(pl){
+      document.getElementById('f-place-id').value = placeId;
+      document.getElementById('f-place-search').style.display = 'none';
+      document.getElementById('f-place-chip-name').textContent = (pl.category?pl.category.split(' ')[0]+' ':'')+pl.name;
+      document.getElementById('f-place-chip').style.display = 'flex';
+    }
+  }, 50);
+}
+
+function buildLinkedPeopleHtml(placeId){
+  try {
+    const linked = (people||[]).filter(x=>x.placeId===placeId);
+    if(!linked.length) return '';
+    const chips = linked.map(x=>{
+      const name = (x.firstname||'?')+(x.lastname?' '+x.lastname:'');
+      const initials = ((x.firstname||'?')[0]+(x.lastname?x.lastname[0]:'')).toUpperCase();
+      const inner = x.photo
+        ? `<img src="${x.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+        : initials;
+      const avClass = x.photo ? '' : av(x.avatarIdx||0);
+      return `<div onclick="closeDetail();setTimeout(()=>openPersonCard('${x.id}'),300)" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;min-width:52px;max-width:64px">
+        <div class="home-result-avatar ${avClass}" style="width:40px;height:40px;font-size:14px;border-radius:50%;flex-shrink:0;overflow:hidden">${inner}</div>
+        <div style="font-size:11px;color:var(--ink2);text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</div>
+      </div>`;
+    }).join('');
+    return `<div class="detail-section"><div class="detail-section-label">People here (${linked.length})</div><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px">${chips}</div></div>`;
+  } catch(e){ console.warn('buildLinkedPeopleHtml error:', e); return ''; }
+}
+
 function openPlaceDetail(id){
   const p=places.find(x=>x.id===id);
   if(!p) return;
@@ -1854,7 +2055,23 @@ function openPlaceDetail(id){
     </div>
     <div class="detail-body">
       ${p.notes?`<div class="detail-section"><div class="detail-section-label">Notes</div><div class="detail-notes">${p.notes}</div></div>`:''}
+      ${buildLinkedPeopleHtml(p.id)}
       <div class="detail-section"><div class="detail-section-label">Added</div><div class="detail-notes">${new Date(p.addedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div>
+      <div class="detail-section" style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
+        <div class="detail-section-label">Link a person here</div>
+        <div style="position:relative;margin-top:6px">
+          <input class="form-input" type="text" id="place-person-search" placeholder="Search people…"
+            autocomplete="off" style="font-size:13px;padding:8px 12px"
+            oninput="personTypeahead(this.value,'${p.id}')"
+            onfocus="personTypeahead(this.value,'${p.id}')"
+            onblur="setTimeout(()=>hidePersonDropdown(),200)">
+          <div id="place-person-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);z-index:600;max-height:200px;overflow-y:auto;margin-top:4px"></div>
+        </div>
+        <button onclick="closeDetail();setTimeout(()=>openNewPersonAtPlace('${p.id}'),300)"
+          style="margin-top:8px;background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0;font-family:inherit">
+          + Add a new person at this place
+        </button>
+      </div>
     </div>
     <div class="detail-footer">
       <button class="btn-detail" onclick="closeDetail();setTimeout(()=>openPlaceModal('${p.id}'),300)">Edit</button>
@@ -1877,16 +2094,7 @@ async function deletePlaceCard(id){
 // ── Person modal open with Quick Add default ────────────────────────────────
 function openPersonModal(editId){
   openModal(editId);
-  // If new person (not editing), collapse extra fields by default
-  if(!editId){
-    document.getElementById('more-details-section').style.display='none';
-    document.getElementById('more-details-arrow').style.transform='rotate(0deg)';
-    document.getElementById('more-details-btn').innerHTML='<span id="more-details-arrow" style="transition:transform 0.2s;display:inline-block">▶</span> More details';
-  } else {
-    // Editing — show full form
-    document.getElementById('more-details-section').style.display='block';
-    document.getElementById('more-details-btn').innerHTML='<span id="more-details-arrow" style="transition:transform 0.2s;display:inline-block;transform:rotate(90deg)">▶</span> Less details';
-  }
+  // openModal already handles show/hide and innerHTML for more-details — nothing extra needed here
 }
 
 function toggleMoreDetails(){
@@ -2057,7 +2265,7 @@ function homeSearch(){
       p.address && p.address.toLowerCase().includes(homeLocationFilter)
     );
     const catIcon=(cat)=>{
-      const map={'🍕 Food':'🍕','☕ Coffee':'☕','🍸 Drinks':'🍸','🛍️ Shopping':'🛍️','🌿 Nature':'🌿','🎭 Culture':'🎭','💪 Fitness':'💪','🏨 Stay':'🏨','💼 Work':'💼','🎲 Other':'🎲'};
+      const map={'🍽️ Restaurant':'🍽️','🍸 Bar':'🍸','☕ Cafe':'☕','🛍️ Shopping':'🛍️','🌿 Outdoors':'🌿','🎭 Culture':'🎭','🏋️ Health & Fitness':'🏋️','🏨 Stay':'🏨','🏥 Services':'🏥','💼 Work':'💼','🎲 Other':'🎲'};
       return map[cat]||'📍';
     };
     resultsEl.innerHTML = filtered.slice(0,8).map(p=>`
@@ -2077,6 +2285,14 @@ function openDetailFromHome(id){
 
 function openPlaceDetailFromHome(id){
   openPlaceDetail(id);
+}
+
+function openPersonCard(id){
+  // Open person detail from within place detail
+  const p = people.find(x=>x.id===id);
+  if(!p) return;
+  currentPersonId = id;
+  openDetail(id);
 }
 
 function homeUseLocation(){
