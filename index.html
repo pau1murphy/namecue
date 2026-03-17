@@ -445,7 +445,7 @@ textarea.form-input{min-height:78px;resize:vertical}
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
     <div class="auth-tagline">The people you meet. The places you love.</div>
-    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.7</div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.10</div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Create account</button>
@@ -537,7 +537,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     </div>
     <div class="header-right">
       <div class="user-badge"><div class="user-dot"></div><span id="user-email-display"></span></div>
-      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.7</span><button class="btn-signout" onclick="signOut()">Sign out</button>
+      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.10</span><button class="btn-signout" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
@@ -1261,10 +1261,12 @@ document.addEventListener('visibilitychange',async()=>{
 // DATABASE
 async function loadPeople(){
   const loadingEl = document.getElementById('loading-state');
-  loadingEl.innerHTML='<div class="spinner"></div>Loading…';
-  loadingEl.style.display='block';
-  document.getElementById('people-grid').style.display='none';
-  document.getElementById('empty-state').style.display='none';
+  if(!currentPlaceView){
+    loadingEl.innerHTML='<div class="spinner"></div>Loading…';
+    loadingEl.style.display='block';
+    document.getElementById('people-grid').style.display='none';
+    document.getElementById('empty-state').style.display='none';
+  }
 
   if(!currentUser){ return; }
 
@@ -1285,10 +1287,13 @@ async function loadPeople(){
     return;
   }
   loadingEl.style.display='none';
-  document.getElementById('people-grid').style.display='grid';
-  document.getElementById('empty-state').style.display='none';
-  filterPeople();
-  render();
+  // Only re-render people view if we're not currently looking at places
+  if(!currentPlaceView){
+    document.getElementById('people-grid').style.display='grid';
+    document.getElementById('empty-state').style.display='none';
+    filterPeople();
+    render();
+  }
 }
 
 async function savePerson(){
@@ -2217,6 +2222,63 @@ function setHomeMode(mode){
   homeSearch();
 }
 
+function highlightMatch(text, q){
+  if(!q||!text) return text||'';
+  const idx = text.toLowerCase().indexOf(q.toLowerCase());
+  if(idx===-1) return text;
+  return text.slice(0,idx)
+    + `<mark style="background:rgba(0,113,227,0.15);color:var(--blue);border-radius:2px;padding:0 1px">${text.slice(idx,idx+q.length)}</mark>`
+    + text.slice(idx+q.length);
+}
+
+function getMatchSnippet(p, q){
+  if(!q) return p.location ? `📍 ${p.location}` : '';
+  const ql = q.toLowerCase();
+  // Check fields in priority order, return snippet from first match
+  const checks = [
+    { val: p.hook,    prefix: '💡 ' },
+    { val: p.context, prefix: '' },
+    { val: p.notes,   prefix: '' },
+    { val: p.location,prefix: '📍 ' },
+    { val: (p.likes||[]).join(', '),    prefix: '✓ ' },
+    { val: (p.dislikes||[]).join(', '), prefix: '✗ ' },
+    { val: (p.categories||[]).join(', '), prefix: '' },
+  ];
+  for(const {val, prefix} of checks){
+    if(!val) continue;
+    const idx = val.toLowerCase().indexOf(ql);
+    if(idx !== -1){
+      // Extract ~60 chars around the match
+      const start = Math.max(0, idx - 20);
+      const end   = Math.min(val.length, idx + q.length + 40);
+      const raw   = (start>0?'…':'')+val.slice(start,end)+(end<val.length?'…':'');
+      return prefix + highlightMatch(raw, q);
+    }
+  }
+  return p.location ? `📍 ${p.location}` : '';
+}
+
+function getPlaceMatchSnippet(p, q){
+  if(!q) return p.address ? `📍 ${p.address}` : '';
+  const ql = q.toLowerCase();
+  const checks = [
+    { val: p.notes,   prefix: '' },
+    { val: p.address, prefix: '📍 ' },
+    { val: p.category,prefix: '' },
+  ];
+  for(const {val, prefix} of checks){
+    if(!val) continue;
+    const idx = val.toLowerCase().indexOf(ql);
+    if(idx !== -1){
+      const start = Math.max(0, idx - 20);
+      const end   = Math.min(val.length, idx + q.length + 40);
+      const raw   = (start>0?'…':'')+val.slice(start,end)+(end<val.length?'…':'');
+      return prefix + highlightMatch(raw, q);
+    }
+  }
+  return p.address ? `📍 ${p.address}` : '';
+}
+
 function homeSearch(){
   const q = document.getElementById('home-search').value.trim().toLowerCase();
   const resultsEl = document.getElementById('home-results');
@@ -2247,11 +2309,12 @@ function homeSearch(){
       const avatarHtml = p.photo
         ? `<img src="${p.photo}" alt="${name}">`
         : `<span>${((p.firstname||'?')[0]+(p.lastname?p.lastname[0]:'')).toUpperCase()}</span>`;
+      const snippet = q ? getMatchSnippet(p, q) : (p.location ? `📍 ${p.location}` : '');
       return `<div class="home-result-item" onclick="openDetailFromHome('${p.id}')">
         <div class="home-result-avatar ${p.photo?'':av(p.avatarIdx||0)}">${avatarHtml}</div>
-        <div>
-          <div class="home-result-name">${name}</div>
-          ${p.location?`<div class="home-result-sub">📍 ${p.location}</div>`:''}
+        <div style="min-width:0">
+          <div class="home-result-name">${highlightMatch(name, q)}</div>
+          ${snippet?`<div class="home-result-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${snippet}</div>`:''}
         </div>
       </div>`;
     }).join('') || `<div class="home-hint">No matches found</div>`;
@@ -2268,14 +2331,16 @@ function homeSearch(){
       const map={'🍽️ Restaurant':'🍽️','🍸 Bar':'🍸','☕ Cafe':'☕','🛍️ Shopping':'🛍️','🌿 Outdoors':'🌿','🎭 Culture':'🎭','🏋️ Health & Fitness':'🏋️','🏨 Stay':'🏨','🏥 Services':'🏥','💼 Work':'💼','🎲 Other':'🎲'};
       return map[cat]||'📍';
     };
-    resultsEl.innerHTML = filtered.slice(0,8).map(p=>`
-      <div class="home-result-item" onclick="openPlaceDetailFromHome('${p.id}')">
+    resultsEl.innerHTML = filtered.slice(0,8).map(p=>{
+      const placeSnippet = q ? getPlaceMatchSnippet(p, q) : (p.address ? `📍 ${p.address}` : '');
+      return `<div class="home-result-item" onclick="openPlaceDetailFromHome('${p.id}')">
         <div class="home-result-place-icon">${catIcon(p.category)}</div>
-        <div>
-          <div class="home-result-name">${p.name}</div>
-          ${p.address?`<div class="home-result-sub">📍 ${p.address}</div>`:''}
+        <div style="min-width:0">
+          <div class="home-result-name">${highlightMatch(p.name, q)}</div>
+          ${placeSnippet?`<div class="home-result-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${placeSnippet}</div>`:''}
         </div>
-      </div>`).join('') || `<div class="home-hint">No matches found</div>`;
+      </div>`;
+    }).join('') || `<div class="home-hint">No matches found</div>`;
   }
 }
 
