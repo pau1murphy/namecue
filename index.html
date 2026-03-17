@@ -443,7 +443,7 @@ textarea.form-input{min-height:78px;resize:vertical}
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
     <div class="auth-tagline">The people you meet. The places you love.</div>
-    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.3</div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.3.1</div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Create account</button>
@@ -511,7 +511,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     <button class="home-toggle-btn active" id="home-btn-people" onclick="setHomeMode('people')">People</button>
     <button class="home-toggle-btn" id="home-btn-places" onclick="setHomeMode('places')">Places</button>
   </div>
-  <div class="home-prompt">What's the cue?</div>
+  <div class="home-prompt" id="home-prompt">Help me remember a person</div>
   <div class="home-search-wrap">
     <span class="home-search-icon">🔍</span>
     <input class="home-search-input" id="home-search" type="text" placeholder="Start typing…" autocomplete="off" oninput="homeSearch()">
@@ -535,7 +535,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     </div>
     <div class="header-right">
       <div class="user-badge"><div class="user-dot"></div><span id="user-email-display"></span></div>
-      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.3</span><button class="btn-signout" onclick="signOut()">Sign out</button>
+      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.3.1</span><button class="btn-signout" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
@@ -1999,6 +1999,7 @@ function setHomeMode(mode){
   homeMode=mode;
   document.getElementById('home-btn-people').classList.toggle('active', mode==='people');
   document.getElementById('home-btn-places').classList.toggle('active', mode==='places');
+  document.getElementById('home-prompt').textContent = mode==='people' ? 'Help me remember a person' : 'Help me remember a place';
   document.getElementById('home-add-label').textContent = mode==='people' ? 'Add a new Person' : 'Add a new Place';
   document.getElementById('home-search').value='';
   document.getElementById('home-results').innerHTML='';
