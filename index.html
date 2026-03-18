@@ -445,7 +445,7 @@ textarea.form-input{min-height:78px;resize:vertical}
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
     <div class="auth-tagline">The people you meet. The places you love.</div>
-    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.14</div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.16</div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Create account</button>
@@ -537,7 +537,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     </div>
     <div class="header-right">
       <div class="user-badge"><div class="user-dot"></div><span id="user-email-display"></span></div>
-      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.14</span><button class="btn-signout" onclick="signOut()">Sign out</button>
+      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.16</span><button class="btn-signout" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
@@ -1175,30 +1175,21 @@ async function setNewPassword(){
   errEl.textContent=''; successEl.textContent='';
   if(password.length<6){errEl.textContent='Password must be at least 6 characters';return;}
   if(password!==confirm){errEl.textContent='Passwords do not match';return;}
-  if(!_recoveryToken){errEl.textContent='Session expired — please request a new reset link';return;}
+  if(!_recoveryToken){errEl.textContent='This reset link has expired — please request a new one.';return;}
   btn.disabled=true; btn.textContent='Saving…';
   try {
-    // First exchange the token_hash for a real session if needed
-    let accessToken = _recoveryToken;
-    if(_recoveryToken.length < 100) {
-      // It's a token_hash, not a full JWT — exchange it first
-      const ex = await fetch(`${SUPABASE_URL}/auth/v1/verify`,{
-        method:'POST',
-        headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
-        body:JSON.stringify({token_hash:_recoveryToken, type:'recovery'})
-      });
-      const exData = await ex.json();
-      if(!ex.ok) throw new Error(exData.error_description || exData.message || 'Session expired — please request a new reset link');
-      accessToken = exData.access_token;
-    }
+    // _recoveryToken is already a full JWT access_token (exchanged on page load)
     const r = await fetch(`${SUPABASE_URL}/auth/v1/user`,{
       method:'PUT',
-      headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${accessToken}`,'Content-Type':'application/json'},
+      headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${_recoveryToken}`,'Content-Type':'application/json'},
       body:JSON.stringify({password})
     });
     const data = await r.json();
     if(!r.ok){
       if(data.error_code==='same_password') throw new Error('Your new password must be different from your current one.');
+      if(data.error_code==='otp_expired' || data.message?.includes('expired') || data.error_description?.includes('expired')){
+        throw new Error('This reset link has expired — please request a new one.');
+      }
       throw new Error(data.error_description || data.message || 'Could not update password');
     }
     _recoveryToken = null;
@@ -1246,13 +1237,24 @@ function showApp(){
   }
 
   // Format 2: PKCE — token_hash in query string (newer Supabase links)
-  // Store the token_hash itself and exchange it only when user clicks Save
+  // Exchange immediately on load to get access_token, then we control the UI
   if(!recoveryToken && queryParams.get('type')==='recovery'){
     const tokenHash = queryParams.get('token_hash') || queryParams.get('token');
     if(tokenHash){
-      // Store the raw token_hash — we'll exchange it at save time
-      // This avoids Supabase creating a session that overrides our recovery flow
-      recoveryToken = tokenHash;
+      try{
+        const r = await fetch(`${SUPABASE_URL}/auth/v1/verify`,{
+          method:'POST',
+          headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
+          body:JSON.stringify({token_hash:tokenHash, type:'recovery'})
+        });
+        const data = await r.json();
+        if(data.access_token){
+          recoveryToken = data.access_token;
+          // Clear the token_hash from URL immediately so the session restore
+          // below doesn't pick it up and redirect to the app
+          history.replaceState(null,'',window.location.pathname);
+        }
+      }catch(e){ console.error('Recovery token exchange failed',e); }
     }
   }
 
