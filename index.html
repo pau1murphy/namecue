@@ -445,7 +445,7 @@ textarea.form-input{min-height:78px;resize:vertical}
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
     <div class="auth-tagline">The people you meet. The places you love.</div>
-    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.12</div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.13</div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Create account</button>
@@ -537,7 +537,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     </div>
     <div class="header-right">
       <div class="user-badge"><div class="user-dot"></div><span id="user-email-display"></span></div>
-      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.12</span><button class="btn-signout" onclick="signOut()">Sign out</button>
+      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.13</span><button class="btn-signout" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
@@ -1197,7 +1197,10 @@ async function setNewPassword(){
       body:JSON.stringify({password})
     });
     const data = await r.json();
-    if(!r.ok) throw new Error(data.error_description || data.message || 'Could not update password');
+    if(!r.ok){
+      if(data.error_code==='same_password') throw new Error('Your new password must be different from your current one.');
+      throw new Error(data.error_description || data.message || 'Could not update password');
+    }
     _recoveryToken = null;
     successEl.textContent='Password updated! You can now sign in.';
     btn.textContent='Password saved ✓';
