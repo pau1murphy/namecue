@@ -445,7 +445,7 @@ textarea.form-input{min-height:78px;resize:vertical}
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
     <div class="auth-tagline">The people you meet. The places you love.</div>
-    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.13</div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.14</div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Create account</button>
@@ -537,7 +537,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     </div>
     <div class="header-right">
       <div class="user-badge"><div class="user-dot"></div><span id="user-email-display"></span></div>
-      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.13</span><button class="btn-signout" onclick="signOut()">Sign out</button>
+      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.14</span><button class="btn-signout" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
@@ -1246,18 +1246,13 @@ function showApp(){
   }
 
   // Format 2: PKCE — token_hash in query string (newer Supabase links)
+  // Store the token_hash itself and exchange it only when user clicks Save
   if(!recoveryToken && queryParams.get('type')==='recovery'){
     const tokenHash = queryParams.get('token_hash') || queryParams.get('token');
     if(tokenHash){
-      try{
-        const r = await fetch(`${SUPABASE_URL}/auth/v1/verify`,{
-          method:'POST',
-          headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
-          body:JSON.stringify({token_hash:tokenHash, type:'recovery'})
-        });
-        const data = await r.json();
-        if(data.access_token) recoveryToken = data.access_token;
-      }catch(e){ console.error('Recovery token exchange failed',e); }
+      // Store the raw token_hash — we'll exchange it at save time
+      // This avoids Supabase creating a session that overrides our recovery flow
+      recoveryToken = tokenHash;
     }
   }
 
