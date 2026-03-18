@@ -445,7 +445,7 @@ textarea.form-input{min-height:78px;resize:vertical}
   <div class="auth-card">
     <div class="auth-logo">Name<span>cue</span></div>
     <div class="auth-tagline">The people you meet. The places you love.</div>
-    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.10</div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:-24px;margin-bottom:24px">v0.8.11</div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('signup')">Create account</button>
@@ -537,7 +537,7 @@ textarea.form-input{min-height:78px;resize:vertical}
     </div>
     <div class="header-right">
       <div class="user-badge"><div class="user-dot"></div><span id="user-email-display"></span></div>
-      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.10</span><button class="btn-signout" onclick="signOut()">Sign out</button>
+      <span style="font-size:11px;color:var(--ink3);margin-right:4px">v0.8.11</span><button class="btn-signout" onclick="signOut()">Sign out</button>
     </div>
   </header>
 
@@ -1218,22 +1218,42 @@ function showApp(){
 }
 
 (async()=>{
-  // Check if this is a password recovery redirect (Supabase puts token in URL hash)
+  // Check for password recovery — handle both hash format and PKCE query param format
   const hash = window.location.hash;
+  const queryParams = new URLSearchParams(window.location.search);
+  let recoveryToken = null;
+
+  // Format 1: access_token in hash (older Supabase links)
   if(hash && hash.includes('type=recovery')){
     const params = new URLSearchParams(hash.replace(/^#/,''));
-    const token = params.get('access_token');
-    if(token){
-      _recoveryToken = token;
-      // Show auth screen in reset mode
-      document.getElementById('auth-screen').style.display='flex';
-      document.getElementById('main-app').style.display='none';
-      document.getElementById('signin-form').style.display='none';
-      document.getElementById('signup-form').style.display='none';
-      document.getElementById('reset-form').style.display='block';
-      document.querySelectorAll('.auth-tab').forEach(t=>t.style.display='none');
-      return; // Don't proceed with normal session restore
+    recoveryToken = params.get('access_token');
+  }
+
+  // Format 2: PKCE — token_hash in query string (newer Supabase links)
+  if(!recoveryToken && queryParams.get('type')==='recovery'){
+    const tokenHash = queryParams.get('token_hash') || queryParams.get('token');
+    if(tokenHash){
+      try{
+        const r = await fetch(`${SUPABASE_URL}/auth/v1/verify`,{
+          method:'POST',
+          headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
+          body:JSON.stringify({token_hash:tokenHash, type:'recovery'})
+        });
+        const data = await r.json();
+        if(data.access_token) recoveryToken = data.access_token;
+      }catch(e){ console.error('Recovery token exchange failed',e); }
     }
+  }
+
+  if(recoveryToken){
+    _recoveryToken = recoveryToken;
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('main-app').style.display='none';
+    document.getElementById('signin-form').style.display='none';
+    document.getElementById('signup-form').style.display='none';
+    document.getElementById('reset-form').style.display='block';
+    document.querySelectorAll('.auth-tab').forEach(t=>t.style.display='none');
+    return;
   }
 
   const session = await nc.init();
